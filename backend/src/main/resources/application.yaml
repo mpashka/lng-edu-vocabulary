@@ -6,6 +6,8 @@ spring:
   # в git нет. Шаблон — secrets.properties.template, что вписывать — README.md.
   # `optional:` нужен, чтобы отсутствие файла не мешало собирать и гонять тесты;
   # при запуске без него не разрешится ${vocabulary.db.password}, и это видно сразу.
+  # На сервере файла нет вовсе: те же значения приезжают окружением
+  # (VOCABULARY_DB_URL / _USERNAME / _PASSWORD) — docs/implementation/deploy.md.
   config:
     import: "optional:file:./secrets.properties"
 

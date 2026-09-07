@@ -18,6 +18,9 @@ Spring Boot 4.1 на Java 25. Отдаёт REST API словаря на `http://
 - `VocabularyApplication.java` — точка входа
 - `WordController.java` — `/api/words` (поиск) и `/api/words/{name}` (карточка слова);
   здесь же записи ответа
+- `ShellController.java` — возврат оболочки по адресам `/word/**`: их знает только
+  страница, и без этого прямая ссылка на статью давала бы 404
+  ([deploy.md](../docs/implementation/deploy.md))
 - `PostgresDictionary.java` — чтение словаря из Postgres: поиск по словоформам, по
   латинице, кириллице и русскому переводу
 - `src/main/resources/application.yaml` — порт 8180, подключение к базе `vocabulary`,
@@ -32,3 +35,6 @@ Spring Boot 4.1 на Java 25. Отдаёт REST API словаря на `http://
 ```
 
 Нужна локальная база Postgres — [development.md](../docs/implementation/development.md).
+
+Сборка для сервера — `./gradlew :backend:bootJar`: в jar уезжает и веб-оболочка. Как это
+выложено и как обновляется — [deploy.md](../docs/implementation/deploy.md).

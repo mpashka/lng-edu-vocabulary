@@ -4,6 +4,9 @@
 раздельно, примеры употребления, связь с корнями. Данные — сербско-русский словарь на
 45 633 статьи, перенесённый в Postgres; сверху Spring Boot и веб-оболочка на Vue.
 
+Работающий словарь — **<https://recnik.srpski.pasha-home.ru>** (открыт всем; как он туда
+попадает — [docs/implementation/deploy.md](docs/implementation/deploy.md)).
+
 - Что словарь умеет — [docs/specification/dictionary.md](docs/specification/dictionary.md)
 - Как устроен — [docs/implementation/index.md](docs/implementation/index.md)
 - План работ — [docs/plan.md](docs/plan.md)
