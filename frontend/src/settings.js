@@ -43,3 +43,27 @@ export const ruleExamples = persistent('vocabulary.ruleExamples', 'true')
 export const ruleExceptions = persistent('vocabulary.ruleExceptions', 'true')
 /** Разбор именно того слова, из карточки которого открыли правило. */
 export const ruleWordBreakdown = persistent('vocabulary.ruleWordBreakdown', 'true')
+
+/**
+ * Настройки под наблюдением: их значения уезжают в сообщение об ошибке, а смена
+ * попадает в журнал действий. Список здесь один на обоих читателей —
+ * [activity.js](activity.js) и [feedback.js](feedback.js), — чтобы диагностика не
+ * начала врать при добавлении настройки.
+ *
+ * @tag:feedback
+ */
+export const tracked = {
+  displayAlphabet: { title: 'сербский текст', value: displayAlphabet },
+  searchAlphabet: { title: 'алфавит поиска', value: searchAlphabet },
+  searchForms: { title: 'поиск по словоформам', value: searchForms },
+  formLabels: { title: 'названия падежей', value: formLabels },
+  showForms: { title: 'показ словоформ', value: showForms },
+  showExamples: { title: 'показ примеров', value: showExamples },
+  showIdioms: { title: 'показ оборотов', value: showIdioms },
+  showRoots: { title: 'показ связей с корнями', value: showRoots },
+  theme: { title: 'тема', value: theme },
+  ruleParadigm: { title: 'правило: парадигма', value: ruleParadigm },
+  ruleExamples: { title: 'правило: примеры', value: ruleExamples },
+  ruleExceptions: { title: 'правило: исключения', value: ruleExceptions },
+  ruleWordBreakdown: { title: 'правило: разбор слова', value: ruleWordBreakdown }
+}

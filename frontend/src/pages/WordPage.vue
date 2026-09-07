@@ -5,6 +5,7 @@
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { loadWord, loadWordById, WordNotFound } from '../api/dictionary.js'
+import { note } from '../activity.js'
 import {
   partOfSpeechName, statusName, statusKey, statusNotable, formName, formNameSerbian,
   formLabel as labelOf
@@ -40,9 +41,12 @@ async function load (name, id) {
     if (own !== controller) return
     found.value = result
     state.value = 'ready'
+    note(`открыта статья «${name}»${id ? ` (id ${id})` : ''}: ${result.words.length} шт.,`
+      + ` нашлось по ${result.matchedBy}`)
   } catch (error) {
     if (own !== controller || error?.name === 'AbortError') return
     state.value = error instanceof WordNotFound ? 'missing' : 'error'
+    note(`статья «${name}» не открылась: ${state.value === 'missing' ? 'слова нет в словаре' : error?.message ?? error}`)
   }
 }
 

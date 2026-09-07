@@ -408,3 +408,39 @@ body:has(.theme-dark) { background: #1d1b18; color: #eee8dd; }
 }
 
 .notice-retry:hover { background: var(--accent-soft); }
+
+/* --- Обращение к разработчику ------------------------------------------- */
+
+.feedback { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.feedback-buttons { display: flex; gap: 6px; }
+.feedback-buttons button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink-soft);
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.feedback-buttons button:hover { color: var(--accent); border-color: var(--accent); }
+.feedback-buttons .feedback-bug:hover { color: #9c3b30; border-color: #9c3b30; }
+/* Занятая кнопка не меняет подпись: иначе её ширина уезжает из-под курсора. */
+.feedback-buttons button.busy { cursor: progress; opacity: 0.6; }
+.feedback-status {
+  max-width: 320px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-faint);
+  text-align: right;
+}
+.feedback-status a { margin-left: 4px; }
+.feedback-hide {
+  margin-left: 6px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}

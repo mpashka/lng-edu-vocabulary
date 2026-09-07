@@ -26,6 +26,7 @@ tags: "@tag:meta"
 | `@tag:import` | Конвертация исходной базы в целевую | `importer/`, [testing/rules-reports.md](testing/rules-reports.md) |
 | `@tag:llm` | Пополнение словаря через LLM | [implementation/llm.md](implementation/llm.md) |
 | `@tag:book-import` | Импорт книги и двуязычный перевод | пока только план, этап 11 |
+| `@tag:feedback` | Обращение к разработчику: кнопки в шапке, журнал действий, состояние в issue | [specification/ui.md](specification/ui.md), `frontend/feedback.js`, `frontend/activity.js`, `frontend/components/FeedbackButtons.vue` |
 | `@tag:deploy` | Выкладка на сервер: сборка одного артефакта, окружение, перенос данных | [implementation/deploy.md](implementation/deploy.md), `backend/ShellController`, `scripts/upload-data.sh`, `home-infra @/docs/apps/vocabulary.md` |
 | `@tag:secrets` | Секреты вне git: `secrets.properties`, его шаблон и потребители | [README.md](../README.md), `secrets.properties.template`, `application.yaml`, `importer/MigrateToPostgres` |
 

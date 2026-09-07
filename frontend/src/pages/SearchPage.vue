@@ -4,6 +4,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { searchWords } from '../api/dictionary.js'
+import { note } from '../activity.js'
 import { searchAlphabet, searchForms } from '../settings.js'
 import { formName, formNameSerbian } from '../labels.js'
 import Accented from '../components/Accented.vue'
@@ -51,12 +52,14 @@ async function run (text) {
     items.value = result.items
     total.value = result.total
     state.value = 'ready'
+    note(`поиск «${text.trim()}» → показано ${result.items.length} из ${result.total}`)
   } catch (error) {
     if (own !== controller || error?.name === 'AbortError') return
     items.value = []
     total.value = 0
     errorText.value = 'Не удалось связаться со словарём. Проверьте, запущен ли сервер.'
     state.value = 'error'
+    note(`поиск «${text.trim()}» → сбой связи: ${error?.message ?? error}`)
   }
 }
 

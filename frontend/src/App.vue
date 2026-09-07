@@ -7,6 +7,7 @@ import {
 } from './settings.js'
 import { openGrammarHelp } from './grammar-help.js'
 import GrammarHelp from './components/GrammarHelp.vue'
+import FeedbackButtons from './components/FeedbackButtons.vue'
 </script>
 
 <template>
@@ -49,6 +50,7 @@ import GrammarHelp from './components/GrammarHelp.vue'
         </label>
       </details>
       <button class="grammar-button" type="button" @click="openGrammarHelp()">Грамматика</button>
+      <FeedbackButtons />
     </header>
     <nav class="quick-toggles" aria-label="Поиск и разделы карточки">
       <button
