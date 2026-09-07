@@ -13,7 +13,7 @@ import { recentActivity } from './activity.js'
  * саму форму. Поэтому снимок кладётся в буфер обмена, а в теле обращения стоит строка,
  * напоминающая вставить его (Ctrl+V).
  */
-const ISSUE_FORM = 'https://github.com/mpashka/home-incubator/issues/new'
+const ISSUE_FORM = 'https://github.com/mpashka/lng-edu-vocabulary/issues/new'
 
 /**
  * Предел длины готового адреса. Ограничение не наше: длинный URL режут и браузер, и

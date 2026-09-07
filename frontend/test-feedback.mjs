@@ -31,6 +31,8 @@ const feature = await composeIssue('feature', searchRoute)
 const body = decodeURIComponent(new URL(feature.url).searchParams.get('body'))
 const title = decodeURIComponent(new URL(feature.url).searchParams.get('title'))
 
+check('обращение идёт в трекер словаря',
+  feature.url.startsWith('https://github.com/mpashka/lng-edu-vocabulary/issues/new'))
 check('пожелание не делает снимок', feature.screenshot === 'skipped')
 check('метка пожелания — enhancement', feature.url.includes('labels=enhancement'))
 check('заголовок называет запрос', title === '[словарь] пожелание в поиске «kuca»')

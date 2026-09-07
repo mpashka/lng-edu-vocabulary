@@ -2,6 +2,9 @@ build/
 .gradle/
 node_modules/
 dist/
+*.log
+.idea/
+*.iml
 
 # Сторонние словари и сканы (крупные, под чужими правами) — не в репозитории.
 .data/
@@ -9,5 +12,7 @@ dist/
 # Секреты: пароль базы, ключи к моделям. В git едет только secrets.properties.template.
 secrets.properties
 
-# В корневом .gitignore монорепозитория стоит `*.jar` — обёртку Gradle возвращаем.
-!gradle/wrapper/gradle-wrapper.jar
+# Рабочие файлы задач: постановка, живой план, отладочные заметки. Живут на машине,
+# правило `~/.claude/rules/llm-wiki-tags.md`. Прежде это правило приезжало из корня
+# монорепозитория инкубатора — здесь корень свой.
+docs/requests/

@@ -4,6 +4,9 @@
 раздельно, примеры употребления, связь с корнями. Данные — сербско-русский словарь на
 45 633 статьи, перенесённый в Postgres; сверху Spring Boot и веб-оболочка на Vue.
 
+Репозиторий — [`mpashka/lng-edu-vocabulary`](https://github.com/mpashka/lng-edu-vocabulary):
+ошибки и пожелания идут в его issue, в том числе кнопками со страницы словаря.
+
 Работающий словарь — **<https://recnik.srpski.pasha-home.ru>** (открыт всем; как он туда
 попадает — [docs/implementation/deploy.md](docs/implementation/deploy.md)).
 
