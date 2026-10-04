@@ -1,5 +1,6 @@
 package org.mpashka.vocabulary.importer;
 
+import org.mpashka.vocabulary.core.Accent;
 import org.mpashka.vocabulary.core.Chunk;
 import org.mpashka.vocabulary.core.Entry;
 import org.mpashka.vocabulary.core.EntryParser;
@@ -8,6 +9,7 @@ import org.mpashka.vocabulary.core.Gender;
 import org.mpashka.vocabulary.core.MarkupParser;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.Serbian;
+import org.mpashka.vocabulary.core.SourceForms;
 import org.mpashka.vocabulary.importer.Homonyms.Homonym;
 
 import java.io.IOException;
@@ -21,7 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Properties;
 
 /**
@@ -65,6 +69,8 @@ public final class MigrateToPostgres {
             System.out.printf("Переводов:              %d%n", counters.translations);
             System.out.printf("Примеров и оборотов:    %d%n", counters.examples);
             System.out.printf("Словоформ для поиска:    %d%n", counters.forms);
+            System.out.printf("  выписаны в словаре:     %d, из них с ударением: %d%n",
+                    counters.sourceForms, counters.sourceAccents);
             System.out.printf("%nРазделено омонимов: %d статей -> %d слов%n",
                     counters.homonymEntries, counters.homonymWords);
             System.out.printf("%nТребуют языковой доработки: %d (%.1f%%)%n",
@@ -152,7 +158,7 @@ public final class MigrateToPostgres {
         // Ударение отсутствует. У проклитик (за, из, и, да) его нет по природе,
         // у остальных это пробел данных — разделить одно от другого разбором нельзя,
         // поэтому помечаем все и разбираем на доработке.
-        if (!hasAccent(entry.headword())) {
+        if (Accent.toneCount(entry.headword()) == 0) {
             reasons.add("нет ударения");
             c.noAccent++;
         }
@@ -188,9 +194,12 @@ public final class MigrateToPostgres {
             c.examples++;
         }
 
-        // Словоформы для поиска. Заглавная форма достоверна (из старого словаря),
-        // остальные порождены правилами и пока без ударения.
+        // Словоформы для поиска. Достоверны заглавная форма и те, что словарь выписал
+        // в статье; остальные порождены правилами и пока без ударения. Одни и те же
+        // буквы кладутся один раз — поэтому ведём список уже записанных.
         String headwordPlain = Serbian.stripCombiningAccents(entry.headword());
+        Set<String> written = new HashSet<>();
+        written.add(headwordPlain);
         w.insertForm(wordId, entry.headword(), headwordPlain, "nom.sg",
                 "SOURCE_DICTIONARY", "SOURCE_DICTIONARY", true);
         c.forms++;
@@ -214,9 +223,25 @@ public final class MigrateToPostgres {
             w.insertForm(wordId, null, latinPlain, "nom.sg.lat", "SOURCE_DICTIONARY", null, false);
             c.forms++;
         }
+        // Формы, выписанные в самой статье: их буквы достоверны, а ударение — там, где
+        // словарь дал его этой форме. Это единственный достоверный источник ударения
+        // в словоформах, поэтому такая форма записывается до правил и показывается ею.
+        for (Form form : SourceForms.inArticle(entry, gender, chunks)) {
+            if (!written.add(form.value())) {
+                continue;
+            }
+            String accent = form.accented().orElse(null);
+            w.insertForm(wordId, accent, form.value(), form.grammar(),
+                    "SOURCE_DICTIONARY", accent == null ? null : "SOURCE_DICTIONARY", true);
+            c.forms++;
+            c.sourceForms++;
+            if (accent != null) {
+                c.sourceAccents++;
+            }
+        }
         for (Form form : WordForms.searchForms(entry, gender, chunks)) {
-            if (form.value().equals(headwordPlain)) {
-                // Заглавная форма уже записана выше — достоверной и с ударением.
+            if (!written.add(form.value())) {
+                // Эти буквы уже записаны — заглавной формой либо выписанной в словаре.
                 continue;
             }
             w.insertForm(wordId, null, form.value(), form.grammar(), "RULES", null, false);
@@ -225,68 +250,17 @@ public final class MigrateToPostgres {
     }
 
     /**
-     * Римские цифры омонимов, упакованных в одну строку.
-     *
-     * <p>Признак точный: <b>повтор заглавного слова</b> (фрагмент {@code C}, равный
-     * заглавному слову) и следом за ним, в пределах шапки статьи, римская цифра.
-     *
-     * <pre>
-     *   би“ти$C#I$#,#бу“де_м$C#…  би“ти$C#II$#,#би“је_м$C#…   → [I, II]
-     * </pre>
-     *
-     * <p>Между повтором и цифрой могут стоять грамматические пометы
-     * ({@code го‛ра$C#ж$#.#,#го“ра$C#ж$#.#I$#}), поэтому цифру ищем не строго
-     * следующим фрагментом, а до первого перевода или номера значения.
-     *
-     * <p>Требование повтора заглавного слова отсекает ссылки на чужие омонимы
-     * («см. Ера II»): там цифра стоит после ссылки, а не после заглавного слова.
-     * Проверено: широкий признак «любая римская цифра» давал 177 ложных срабатываний.
-     */
-    private static List<String> homonymNumerals(List<Chunk> chunks) {
-        String headword = plain(chunks.getFirst().text());
-        List<String> numerals = new ArrayList<>();
-        for (int i = 0; i < chunks.size(); i++) {
-            Chunk chunk = chunks.get(i);
-            if (!Chunk.SERBIAN.equals(chunk.tag()) || !plain(chunk.text()).equals(headword)) {
-                continue;
-            }
-            for (int j = i + 1; j < chunks.size() && j < i + 7; j++) {
-                Chunk next = chunks.get(j);
-                if (next.isTranslation() || Chunk.SENSE_NUMBER.equals(next.tag())) {
-                    break;
-                }
-                if (Chunk.RUSSIAN_PLAIN.equals(next.tag()) && isRomanNumeral(next.text().trim())) {
-                    numerals.add(next.text().trim());
-                    break;
-                }
-            }
-        }
-        return numerals;
-    }
-
-    /** Есть ли в отрисованном слове хоть один знак тона (не считая долготы). */
-    private static boolean hasAccent(String rendered) {
-        for (int i = 0; i < rendered.length(); i++) {
-            char ch = rendered.charAt(i);
-            if (ch == '\u0300' || ch == '\u0301' || ch == '\u030F' || ch == '\u0311') {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Варианты ударения заглавного слова: повторы заглавного слова в шапке статьи.
      * Словарь пишет их подряд через запятую — это допустимые произношения одного слова.
      */
     private static List<String> accentVariants(List<Chunk> chunks) {
-        String headword = plain(chunks.getFirst().text());
+        String headword = Serbian.bare(chunks.getFirst().text());
         List<String> variants = new ArrayList<>();
         for (Chunk chunk : chunks) {
             if (chunk.isTranslation() || Chunk.SENSE_NUMBER.equals(chunk.tag())) {
                 break;
             }
-            if (Chunk.SERBIAN.equals(chunk.tag()) && plain(chunk.text()).equals(headword)) {
+            if (Chunk.SERBIAN.equals(chunk.tag()) && Serbian.bare(chunk.text()).equals(headword)) {
                 String variant = Serbian.stripStemMarker(chunk.text());
                 if (!variants.contains(variant)) {
                     variants.add(variant);
@@ -294,14 +268,6 @@ public final class MigrateToPostgres {
             }
         }
         return variants;
-    }
-
-    private static String plain(String text) {
-        return Serbian.stripAccents(Serbian.stripStemMarker(text)).trim();
-    }
-
-    private static boolean isRomanNumeral(String text) {
-        return text.matches("I{1,3}|IV|VI{0,3}");
     }
 
     private static void clear(Connection pg) throws SQLException {
@@ -423,6 +389,8 @@ public final class MigrateToPostgres {
         int translations;
         int examples;
         int forms;
+        int sourceForms;
+        int sourceAccents;
         int needsReview;
         int homonymEntries;
         int homonymWords;

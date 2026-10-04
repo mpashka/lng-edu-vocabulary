@@ -45,13 +45,13 @@ public final class Homonyms {
         if (chunks.isEmpty()) {
             return List.of(new Homonym(markup, null));
         }
-        String headword = plain(chunks.getFirst().text());
+        String headword = Serbian.bare(chunks.getFirst().text());
 
         List<Integer> starts = new ArrayList<>();
         List<String> numerals = new ArrayList<>();
         for (int i = 0; i < chunks.size(); i++) {
             Chunk chunk = chunks.get(i);
-            if (!Chunk.SERBIAN.equals(chunk.tag()) || !plain(chunk.text()).equals(headword)) {
+            if (!Chunk.SERBIAN.equals(chunk.tag()) || !Serbian.bare(chunk.text()).equals(headword)) {
                 continue;
             }
             String numeral = numeralAfter(chunks, i);
@@ -92,7 +92,7 @@ public final class Homonyms {
         int start = index;
         for (int j = index - 1; j >= 0; j--) {
             Chunk chunk = chunks.get(j);
-            if (Chunk.SERBIAN.equals(chunk.tag()) && plain(chunk.text()).equals(headword)) {
+            if (Chunk.SERBIAN.equals(chunk.tag()) && Serbian.bare(chunk.text()).equals(headword)) {
                 start = j;
                 continue;
             }
@@ -131,10 +131,6 @@ public final class Homonyms {
             markup.append('#');
         }
         return markup.toString();
-    }
-
-    private static String plain(String text) {
-        return Serbian.stripAccents(Serbian.stripStemMarker(text)).trim();
     }
 
     private static boolean isRomanNumeral(String text) {

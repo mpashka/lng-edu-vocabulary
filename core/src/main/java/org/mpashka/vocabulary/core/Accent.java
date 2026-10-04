@@ -59,6 +59,25 @@ public enum Accent {
         return this != LENGTH;
     }
 
+    /**
+     * Сколько знаков тона стоит в отрисованном слове. Заударная долгота тоном не
+     * считается.
+     *
+     * <p>В сербском слове тон ровно один, поэтому по этому счёту видно и то, что
+     * ударения нет вовсе, и то, что форма склеена из двух разных ударений.
+     */
+    public static int toneCount(String rendered) {
+        int count = 0;
+        for (int i = 0; i < rendered.length(); i++) {
+            for (Accent accent : values()) {
+                if (accent.isTone() && accent.combining == rendered.charAt(i)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     /** Ударение по знаку из исходной базы либо {@code null}, если знак не ударение. */
     public static Accent bySourceMark(char mark) {
         for (Accent accent : values()) {

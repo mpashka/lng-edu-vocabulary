@@ -74,6 +74,15 @@ public final class Serbian {
     }
 
     /**
+     * Голое слово: без знаков ударения исходной базы, без служебного {@code ||} и без
+     * обрамляющих пробелов. В таком виде слова сравниваются между собой и попадают
+     * в указатель поиска.
+     */
+    public static String bare(String withSourceMarks) {
+        return stripAccents(stripStemMarker(withSourceMarks)).trim();
+    }
+
+    /**
      * Убирает комбинируемые знаки ударения (те, что ставит {@link #renderAccents}),
      * оставляя голое слово.
      *

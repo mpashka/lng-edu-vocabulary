@@ -8,45 +8,14 @@ import java.util.Set;
  * Формы прилагательного по родам.
  *
  * <p><b>Важно: у прилагательных эти формы в исходной базе уже есть.</b> Словарь указывает
- * их сразу после заглавного слова ({@code абеце’д||ан, ~ни_, ~на, ~но}), поэтому при
- * переносе данных их надо <b>забирать готовыми</b>, а не выводить правилами. Порождение
- * нужно лишь там, где словарь форму опустил.
+ * их сразу после заглавного слова ({@code абеце’д||ан, ~ни_, ~на, ~но}), и забирает их
+ * оттуда {@link SourceForms} — вместе с ударением, где словарь его дал. Правила нужны
+ * лишь там, где словарь форму опустил.
  */
 // @tag:word-forms
 public final class AdjectiveDeclension {
 
     private AdjectiveDeclension() {
-    }
-
-    /**
-     * Формы, выписанные в самой статье: определённая мужского рода, женского, среднего.
-     * Тильда раскрывается в основу заглавного слова.
-     *
-     * @return формы в том порядке, в каком они стоят в статье
-     */
-    public static List<String> formsFromEntry(List<Chunk> chunks) {
-        Set<String> forms = new LinkedHashSet<>();
-        if (chunks.isEmpty()) {
-            return List.of();
-        }
-        String headword = chunks.getFirst().text();
-        // Само заглавное слово — тоже форма (краткая мужского рода), поэтому идёт первым.
-        forms.add(Serbian.stripAccents(Serbian.stripStemMarker(headword)).trim());
-        for (int i = 1; i < chunks.size(); i++) {
-            Chunk chunk = chunks.get(i);
-            if (chunk.isTranslation() || Chunk.SENSE_NUMBER.equals(chunk.tag())) {
-                break;
-            }
-            if (!Chunk.SERBIAN.equals(chunk.tag())) {
-                continue;
-            }
-            String form = Serbian.stripAccents(
-                    Serbian.stripStemMarker(Serbian.expandTilde(chunk.text(), headword))).trim();
-            if (!form.isEmpty()) {
-                forms.add(form);
-            }
-        }
-        return List.copyOf(forms);
     }
 
     /**
@@ -57,7 +26,7 @@ public final class AdjectiveDeclension {
      * {@code абеце’дан → абеце’дна, абеце’дно}.
      */
     public static List<String> genderForms(String headword) {
-        String bare = Serbian.stripAccents(Serbian.stripStemMarker(headword)).trim();
+        String bare = Serbian.bare(headword);
         if (bare.isEmpty()) {
             return List.of();
         }

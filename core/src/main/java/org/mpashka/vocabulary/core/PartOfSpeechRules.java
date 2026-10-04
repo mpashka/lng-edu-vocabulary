@@ -127,7 +127,7 @@ public final class PartOfSpeechRules {
      * где вторая форма — всего лишь вариант написания.
      */
     private static boolean looksLikeVerb(String headword) {
-        String bare = Serbian.stripAccents(Serbian.stripStemMarker(headword)).trim();
+        String bare = Serbian.bare(headword);
         if (bare.endsWith(" се")) {
             bare = bare.substring(0, bare.length() - 3).trim();
         }

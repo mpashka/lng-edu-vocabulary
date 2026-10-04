@@ -71,12 +71,9 @@ public final class WordForms {
                 }
             }
             case ADJECTIVE -> {
-                // У прилагательных формы родов выписаны в самой статье — берём готовыми.
-                // Какому роду какая форма отвечает, из статьи не следует, поэтому помета
-                // общая: «форма прилагательного».
-                for (String form : AdjectiveDeclension.formsFromEntry(chunks)) {
-                    add(forms, "adj", form);
-                }
+                // Формы, выписанные в самой статье, забирает SourceForms — здесь только
+                // порождённые. Какому роду какая форма отвечает, из статьи не следует,
+                // поэтому помета общая: «форма прилагательного».
                 for (String form : AdjectiveDeclension.genderForms(headwordPlain)) {
                     add(forms, "adj", form);
                 }

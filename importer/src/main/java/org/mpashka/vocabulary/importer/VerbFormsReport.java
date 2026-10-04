@@ -1,10 +1,13 @@
 package org.mpashka.vocabulary.importer;
 
 import org.mpashka.vocabulary.core.Chunk;
+import org.mpashka.vocabulary.core.EntryParser;
+import org.mpashka.vocabulary.core.Form;
 import org.mpashka.vocabulary.core.MarkupParser;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.PartOfSpeechRules;
 import org.mpashka.vocabulary.core.Serbian;
+import org.mpashka.vocabulary.core.SourceForms;
 import org.mpashka.vocabulary.core.VerbConjugation;
 
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public final class VerbFormsReport {
             verbs++;
 
             String infinitive = chunks.getFirst().text();
-            String expected = presentFromSource(chunks, infinitive);
+            String expected = presentFromSource(row, chunks);
             if (expected == null) {
                 continue;
             }
@@ -111,43 +114,16 @@ public final class VerbFormsReport {
     }
 
     /**
-     * Форма настоящего времени, указанная в статье. Сокращённая запись (перед формой
-     * стоит отдельный фрагмент «-») восстанавливается по инфинитиву.
+     * Форма настоящего времени, указанная в статье. Берётся тем же кодом, которым она
+     * переносится в базу, — иначе сверка перестанет мерить то, что переносится.
      */
-    private static String presentFromSource(List<Chunk> chunks, String infinitive) {
-        boolean abbreviated = false;
-        for (int i = 1; i < chunks.size() && i < 5; i++) {
-            Chunk chunk = chunks.get(i);
-            if (chunk.isTranslation() || Chunk.SENSE_NUMBER.equals(chunk.tag())) {
-                return null;
-            }
-            if (!chunk.hasTag() && chunk.text().startsWith("-")) {
-                abbreviated = true;
-                continue;
-            }
-            if (!Chunk.SERBIAN.equals(chunk.tag()) && !Chunk.SERBIAN_LINK.equals(chunk.tag())) {
-                continue;
-            }
-            String form = bare(chunk.text());
-            // Возвратная частица идёт отдельным фрагментом — это не форма, смотрим дальше.
-            if (form.equals("се")) {
-                continue;
-            }
-            // Тильда означает повтор основы — это не форма настоящего времени,
-            // а статья другого устройства (причастие, устойчивое сочетание).
-            if (form.isEmpty() || form.startsWith("~") || form.equals(bare(infinitive))) {
-                return null;
-            }
-            // Дефис бывает отдельным фрагментом, внутри текста формы, а иногда
-            // отсутствует вовсе. Тогда сокращение видно по самой форме: она короче
-            // инфинитива и начинается с других букв («биберити, рим»).
-            boolean shortened = abbreviated || form.startsWith("-")
-                    || (form.length() < bare(infinitive).length()
-                        && form.length() >= 2
-                        && !bare(infinitive).startsWith(form.substring(0, 2)));
-            return shortened ? VerbConjugation.expandAbbreviated(infinitive, form) : form;
-        }
-        return null;
+    private static String presentFromSource(SourceReader.Row row, List<Chunk> chunks) {
+        var entry = EntryParser.parse(row.name(), row.kw(), row.xml());
+        return SourceForms.inArticle(entry, null, chunks).stream()
+                .filter(form -> "praes.1sg".equals(form.grammar()))
+                .map(Form::value)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -173,7 +149,7 @@ public final class VerbFormsReport {
     }
 
     private static String bare(String text) {
-        return Serbian.stripAccents(Serbian.stripStemMarker(text)).trim();
+        return Serbian.bare(text);
     }
 
     private static List<SourceReader.Row> rows(String path) {

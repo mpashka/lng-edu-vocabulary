@@ -12,7 +12,7 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms"
 `importer` и `backend`.
 
 Код: `src/main/java/org/mpashka/vocabulary/core/`, тесты: `src/test/java/…` —
-77 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
+87 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
 
 ## Разбор исходной разметки
 
@@ -36,6 +36,8 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms"
 
 - `PartOfSpeechRules.java` — определение части речи по помете и по строению слова
   ([part-of-speech.md](../docs/implementation/part-of-speech.md))
+- `SourceForms.java` — формы, выписанные в самой статье: буквы и, где словарь его
+  напечатал, ударение — единственное достоверное ударение в словоформах
 - `NounDeclension.java` — склонение существительных, опорная форма — родительный падеж
 - `VerbConjugation.java` — спряжение глаголов, опорная форма — первое лицо настоящего времени
 - `AdjectiveDeclension.java` — формы прилагательного по родам

@@ -2,9 +2,12 @@ package org.mpashka.vocabulary.importer;
 
 import org.mpashka.vocabulary.core.AdjectiveDeclension;
 import org.mpashka.vocabulary.core.Chunk;
+import org.mpashka.vocabulary.core.EntryParser;
+import org.mpashka.vocabulary.core.Form;
 import org.mpashka.vocabulary.core.MarkupParser;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.PartOfSpeechRules;
+import org.mpashka.vocabulary.core.SourceForms;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +31,7 @@ public final class AdjectiveFormsReport {
         int withForms = 0;
         int covered = 0;
         long formsTotal = 0;
+        long accented = 0;
         long generatedTotal = 0;
         List<String> gaps = new ArrayList<>();
 
@@ -40,16 +44,19 @@ public final class AdjectiveFormsReport {
                 continue;
             }
             adjectives++;
-            List<String> listed = AdjectiveDeclension.formsFromEntry(chunks);
-            if (listed.size() <= 1) {
+            var entry = EntryParser.parse(row.name(), row.kw(), row.xml());
+            List<Form> written = SourceForms.inArticle(entry, null, chunks);
+            if (written.isEmpty()) {
                 continue;
             }
+            List<String> listed = written.stream().map(Form::value).toList();
             withForms++;
-            formsTotal += listed.size() - 1;
+            formsTotal += listed.size();
+            accented += written.stream().filter(form -> form.accented().isPresent()).count();
 
             List<String> generated = AdjectiveDeclension.genderForms(chunks.getFirst().text());
             generatedTotal += generated.size();
-            boolean all = listed.stream().skip(1).allMatch(generated::contains);
+            boolean all = generated.containsAll(listed);
             if (all) {
                 covered++;
             } else if (gaps.size() < 12) {
@@ -62,7 +69,8 @@ public final class AdjectiveFormsReport {
         System.out.printf("Прилагательных (по строению статьи): %d%n", adjectives);
         System.out.printf("Из них формы родов выписаны:         %d (%.1f%%)%n",
                 withForms, 100.0 * withForms / Math.max(adjectives, 1));
-        System.out.printf("Готовых форм в словаре:              %d%n%n", formsTotal);
+        System.out.printf("Готовых форм в словаре:              %d%n", formsTotal);
+        System.out.printf("Из них с ударением:                  %d%n%n", accented);
         System.out.printf("Правила воспроизводят все формы:     %d из %d (%.1f%%)%n",
                 covered, withForms, 100.0 * covered / Math.max(withForms, 1));
         System.out.printf("В среднем порождается вариантов:     %.2f%n",

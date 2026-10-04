@@ -9,16 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AdjectiveDeclensionTest {
 
     @Test
-    @DisplayName("формы родов берутся готовыми из статьи, тильда раскрывается")
-    void takesFormsFromEntry() {
-        var chunks = MarkupParser.parse(
-                "а‛псурд||ан$C#,#~ни_$C#,#~на$C#,#~но$C#абсу’рдный$RV#.#");
-
-        assertThat(AdjectiveDeclension.formsFromEntry(chunks))
-                .containsExactly("апсурдан", "апсурдни", "апсурдна", "апсурдно");
-    }
-
-    @Test
     @DisplayName("краткая форма: беглое «а» выпадает")
     void generatesFromShortForm() {
         assertThat(AdjectiveDeclension.genderForms("а‛псурд||ан"))

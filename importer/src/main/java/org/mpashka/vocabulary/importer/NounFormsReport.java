@@ -2,10 +2,12 @@ package org.mpashka.vocabulary.importer;
 
 import org.mpashka.vocabulary.core.Chunk;
 import org.mpashka.vocabulary.core.EntryParser;
+import org.mpashka.vocabulary.core.Form;
 import org.mpashka.vocabulary.core.Gender;
 import org.mpashka.vocabulary.core.MarkupParser;
 import org.mpashka.vocabulary.core.NounDeclension;
 import org.mpashka.vocabulary.core.Serbian;
+import org.mpashka.vocabulary.core.SourceForms;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -66,7 +68,7 @@ public final class NounFormsReport {
             if (bare(headword).contains(" ")) {
                 continue;
             }
-            String expected = genitiveFromSource(chunks, headword);
+            String expected = genitiveFromSource(row, chunks, gender);
             if (expected == null) {
                 continue;
             }
@@ -123,29 +125,21 @@ public final class NounFormsReport {
     }
 
     /**
-     * Родительный падеж, указанный в статье: второй сербский фрагмент шапки.
-     * Форма через тильду раскрывается в основу заглавного слова.
+     * Родительный падеж, указанный в статье. Берётся тем же кодом, которым форма
+     * переносится в базу, — иначе сверка перестанет мерить то, что переносится.
      */
-    private static String genitiveFromSource(List<Chunk> chunks, String headword) {
-        for (int i = 1; i < chunks.size() && i < 4; i++) {
-            Chunk chunk = chunks.get(i);
-            if (chunk.isTranslation() || Chunk.SENSE_NUMBER.equals(chunk.tag())) {
-                return null;
-            }
-            if (!Chunk.SERBIAN.equals(chunk.tag())) {
-                continue;
-            }
-            String form = bare(Serbian.expandTilde(chunk.text(), headword));
-            // Отсекаем варианты написания. Сравнение без учёта регистра: у имён
-            // собственных вторым фрагментом идёт тот же заголовок со строчной буквы
-            // (Африка, африка), и это не падежная форма.
-            return form.equalsIgnoreCase(bare(headword)) ? null : form;
-        }
-        return null;
+    private static String genitiveFromSource(SourceReader.Row row, List<Chunk> chunks,
+                                             Gender gender) {
+        var entry = EntryParser.parse(row.name(), row.kw(), row.xml());
+        return SourceForms.inArticle(entry, gender, chunks).stream()
+                .filter(form -> "gen.sg".equals(form.grammar()))
+                .map(Form::value)
+                .findFirst()
+                .orElse(null);
     }
 
     private static String bare(String text) {
-        return Serbian.stripAccents(Serbian.stripStemMarker(text)).trim();
+        return Serbian.bare(text);
     }
 
     private static List<SourceReader.Row> rows(String path) {

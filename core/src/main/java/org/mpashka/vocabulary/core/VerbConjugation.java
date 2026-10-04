@@ -51,7 +51,7 @@ public final class VerbConjugation {
      * @return форма без знаков ударения либо {@code null}, если слово не похоже на инфинитив
      */
     public static String presentFirstSingular(String infinitive) {
-        String bare = bare(infinitive);
+        String bare = Serbian.bare(infinitive);
         boolean reflexive = bare.endsWith(" се");
         if (reflexive) {
             bare = bare.substring(0, bare.length() - 3).trim();
@@ -79,7 +79,7 @@ public final class VerbConjugation {
         if (main != null) {
             candidates.add(main);
         }
-        String bare = bare(infinitive);
+        String bare = Serbian.bare(infinitive);
         boolean reflexive = bare.endsWith(" се");
         if (reflexive) {
             bare = bare.substring(0, bare.length() - 3).trim();
@@ -129,8 +129,8 @@ public final class VerbConjugation {
      * @return восстановленная форма либо сам хвост, если совместить не удалось
      */
     public static String expandAbbreviated(String infinitive, String tail) {
-        String bareInfinitive = bare(infinitive);
-        String bareTail = bare(tail);
+        String bareInfinitive = Serbian.bare(infinitive);
+        String bareTail = Serbian.bare(tail);
         while (bareTail.startsWith("-")) {
             bareTail = bareTail.substring(1);
         }
@@ -154,9 +154,5 @@ public final class VerbConjugation {
 
     private static void add(Set<String> target, String form, boolean reflexive) {
         target.add(reflexive ? form + " се" : form);
-    }
-
-    private static String bare(String text) {
-        return Serbian.stripAccents(Serbian.stripStemMarker(text)).trim();
     }
 }
