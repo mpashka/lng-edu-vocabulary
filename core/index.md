@@ -12,7 +12,7 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms @tag:wiktiona
 `importer` и `backend`.
 
 Код: `src/main/java/org/mpashka/vocabulary/core/`, тесты: `src/test/java/…` —
-104 проверки, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
+115 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
 
 ## Разбор исходной разметки
 
@@ -39,6 +39,8 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms @tag:wiktiona
 
 - `PartOfSpeechRules.java` — определение части речи по помете и по строению слова
   ([part-of-speech.md](../docs/implementation/part-of-speech.md))
+- `UnstressedWords.java` — безударные служебные слова: заглавное без тона и служебный
+  перевод ([word-forms.md](../docs/implementation/word-forms.md), «Безударные слова»)
 - `SourceForms.java` — формы, выписанные в самой статье: буквы и, где словарь его
   напечатал, ударение — единственное достоверное ударение в словоформах
 - `NounDeclension.java` — склонение существительных, опорная форма — родительный падеж

@@ -10,6 +10,7 @@ import org.mpashka.vocabulary.core.MarkupParser;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.Serbian;
 import org.mpashka.vocabulary.core.SourceForms;
+import org.mpashka.vocabulary.core.UnstressedWords;
 import org.mpashka.vocabulary.importer.Homonyms.Homonym;
 
 import java.sql.Connection;
@@ -72,6 +73,7 @@ public final class MigrateToPostgres {
                     counters.needsReview, 100.0 * counters.needsReview / counters.words);
             System.out.printf("  часть речи не определена:  %d%n", counters.unknownPos);
             System.out.printf("  нет ударения:              %d%n", counters.noAccent);
+            System.out.printf("Безударных служебных слов:  %d%n", counters.unstressed);
             System.out.printf("%nВариантов ударения сохранено: %d%n", counters.accentVariants);
         }
     }
@@ -112,10 +114,10 @@ public final class MigrateToPostgres {
             reasons.add("часть речи не определена");
             c.unknownPos++;
         }
-        // Ударение отсутствует. У проклитик (за, из, и, да) его нет по природе,
-        // у остальных это пробел данных — разделить одно от другого разбором нельзя,
-        // поэтому помечаем все и разбираем на доработке.
-        if (Accent.toneCount(entry.headword()) == 0) {
+        boolean unstressed = UnstressedWords.isUnstressed(entry);
+        if (unstressed) {
+            c.unstressed++;
+        } else if (Accent.toneCount(entry.headword()) == 0) {
             reasons.add("нет ударения");
             c.noAccent++;
         }
@@ -124,7 +126,7 @@ public final class MigrateToPostgres {
 
         String status = hasTranslation ? "IMPORTED" : "NO_TRANSLATION";
         long wordId = w.insertWord(entry, gender, status, row.name(), homonymIndex,
-                reasons.isEmpty() ? null : String.join(", ", reasons));
+                reasons.isEmpty() ? null : String.join(", ", reasons), unstressed);
         c.words++;
         if (!reasons.isEmpty()) {
             c.needsReview++;
@@ -255,9 +257,10 @@ public final class MigrateToPostgres {
                     insert into word (headword, headword_plain, headword_latin,
                         part_of_speech, part_of_speech_source, gender, status,
                         last_changed_by, source_key, homonym_index,
-                        needs_language_review, review_reason)
+                        needs_language_review, review_reason, unstressed_source)
                     values (?, ?, ?, cast(? as part_of_speech), 'RULES',
-                        cast(? as gender), cast(? as word_status), 'RULES', ?, ?, ?, ?)
+                        cast(? as gender), cast(? as word_status), 'RULES', ?, ?, ?, ?,
+                        cast(? as data_source))
                     returning id""");
             sense = pg.prepareStatement(
                     "insert into sense (word_id, number, source, ordinal) "
@@ -275,7 +278,7 @@ public final class MigrateToPostgres {
         }
 
         long insertWord(Entry entry, Gender gender, String status, String sourceKey,
-                        int homonymIndex, String reason) throws SQLException {
+                        int homonymIndex, String reason, boolean unstressed) throws SQLException {
             word.setString(1, entry.headword());
             word.setString(2, Serbian.stripCombiningAccents(entry.headword()));
             word.setString(3, entry.headwordLatin());
@@ -286,6 +289,7 @@ public final class MigrateToPostgres {
             word.setInt(8, homonymIndex);
             word.setBoolean(9, reason != null);
             word.setString(10, reason);
+            word.setString(11, unstressed ? "RULES" : null);
             return returningId(word);
         }
 
@@ -363,6 +367,7 @@ public final class MigrateToPostgres {
         int homonymWords;
         int unknownPos;
         int noAccent;
+        int unstressed;
         int accentVariants;
     }
 
