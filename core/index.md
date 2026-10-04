@@ -12,7 +12,7 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms @tag:wiktiona
 `importer` и `backend`.
 
 Код: `src/main/java/org/mpashka/vocabulary/core/`, тесты: `src/test/java/…` —
-115 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
+117 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
 
 ## Разбор исходной разметки
 

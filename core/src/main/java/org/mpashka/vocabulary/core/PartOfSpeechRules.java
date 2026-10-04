@@ -45,6 +45,9 @@ public final class PartOfSpeechRules {
             Map.entry("межд", PartOfSpeech.INTERJECTION),
             Map.entry("союз", PartOfSpeech.CONJUNCTION),
             Map.entry("предл", PartOfSpeech.PREPOSITION),
+            // Статья предлога пишет «предлог с род. п.» полностью; без этой строки следующее
+            // «с» читалось как средний род, и «из», «од», «кроз» становились существительными.
+            Map.entry("предлог", PartOfSpeech.PREPOSITION),
             Map.entry("частица", PartOfSpeech.PARTICLE));
 
     /**
@@ -78,6 +81,18 @@ public final class PartOfSpeechRules {
     public static PartOfSpeech detect(List<String> marks, List<Chunk> chunks) {
         PartOfSpeech byMark = detectByMark(marks);
         return byMark != PartOfSpeech.UNKNOWN ? byMark : detectByStructure(chunks);
+    }
+
+    /**
+     * Часть речи по смыслу статьи, когда ни помета, ни строение не сработали: восклицательный
+     * знак у заглавного слова — междометие ({@code а̀ма̄н!}), безударное служебное слово — по
+     * классу своего перевода ({@link UnstressedWords}).
+     */
+    public static PartOfSpeech detectByMeaning(String headword, List<Entry.Sense> senses) {
+        if (headword.strip().endsWith("!")) {
+            return PartOfSpeech.INTERJECTION;
+        }
+        return UnstressedWords.partOfSpeech(headword, senses);
     }
 
     /**

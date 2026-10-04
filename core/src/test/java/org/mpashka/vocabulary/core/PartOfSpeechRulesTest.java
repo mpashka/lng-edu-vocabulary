@@ -143,4 +143,26 @@ class PartOfSpeechRulesTest {
             assertThat(detect(markup)).isEqualTo(PartOfSpeech.NOUN);
         }
     }
+
+    @Nested
+    @DisplayName("Предлог и правило по смыслу")
+    class Prepositions {
+
+        @Test
+        @DisplayName("«предлог с род. п.» — предлог: «с» здесь не средний род")
+        void prepositionWrittenInFull() {
+            assertThat(detect("из$C#предлог$#с$#род$#.#п$#.#1$D#)#указывает$#направление$#из$RV#;#"))
+                    .isEqualTo(PartOfSpeech.PREPOSITION);
+        }
+
+        @Test
+        @DisplayName("без пометы: «!» у заглавного — междометие, безударное — по переводу")
+        void byMeaning() {
+            Entry aman = EntryParser.parse("", "", "а‛ма_н!$C#пощади’!$RV#;#");
+            Entry iza = EntryParser.parse("", "", "иза$C#за$RV#;#позади’$RV#;#");
+
+            assertThat(aman.partOfSpeech()).isEqualTo(PartOfSpeech.INTERJECTION);
+            assertThat(iza.partOfSpeech()).isEqualTo(PartOfSpeech.PREPOSITION);
+        }
+    }
 }

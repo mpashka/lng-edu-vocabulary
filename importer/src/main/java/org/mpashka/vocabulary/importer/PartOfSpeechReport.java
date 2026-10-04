@@ -3,6 +3,7 @@ package org.mpashka.vocabulary.importer;
 import org.mpashka.vocabulary.core.Chunk;
 import org.mpashka.vocabulary.core.EntryParser;
 import org.mpashka.vocabulary.core.MarkupParser;
+import org.mpashka.vocabulary.core.Entry;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.PartOfSpeechRules;
 
@@ -43,6 +44,8 @@ public final class PartOfSpeechReport {
         List<String> wrongSamples = new ArrayList<>();
         List<String> unknownSamples = new ArrayList<>();
         List<String> adjectiveSamples = new ArrayList<>();
+        Map<PartOfSpeech, int[]> meaningChecked = new EnumMap<>(PartOfSpeech.class);
+        List<String> meaningWrong = new ArrayList<>();
 
         SourceReader reader = new SourceReader(path);
         for (var row : collect(reader)) {
@@ -52,6 +55,14 @@ public final class PartOfSpeechReport {
 
             PartOfSpeech expected = PartOfSpeechRules.detectByMark(marks);
             PartOfSpeech structural = PartOfSpeechRules.detectByStructure(chunks);
+            Entry entry = EntryParser.parse(row.name(), row.kw(), row.xml());
+            PartOfSpeech byMeaning = PartOfSpeechRules.detectByMeaning(entry.headword(), entry.senses());
+            if (expected != PartOfSpeech.UNKNOWN && byMeaning != PartOfSpeech.UNKNOWN) {
+                meaningChecked.computeIfAbsent(byMeaning, key -> new int[2])[byMeaning == expected ? 0 : 1]++;
+                if (byMeaning != expected && meaningWrong.size() < SAMPLE_SIZE) {
+                    meaningWrong.add("  %-18s помета %-12s по смыслу %-12s".formatted(row.name(), expected, byMeaning));
+                }
+            }
             PartOfSpeech actual = PartOfSpeechRules.detect(marks, chunks);
             finalCounts.merge(actual, 1, Integer::sum);
 
@@ -116,6 +127,12 @@ public final class PartOfSpeechReport {
         System.out.printf("  %-14s %8s %8s %8s%n", "часть речи", "всего", "верно", "ошибок");
         byExpected.forEach((pos, counters) -> System.out.printf("  %-14s %8d %8d %8d%n",
                 pos, counters[0], counters[1], counters[2]));
+
+        System.out.println("\n--- По смыслу: «!» — междометие, безударное — по переводу (образец — помета) ---");
+        System.out.printf("  %-14s %8s %8s%n", "по смыслу", "верно", "ошибок");
+        meaningChecked.forEach((pos, counters) -> System.out.printf("  %-14s %8d %8d%n",
+                pos, counters[0], counters[1]));
+        meaningWrong.forEach(System.out::println);
 
         System.out.println("\n--- Статьи без явной пометы ---");
         System.out.printf("Всего: %d, из них строение определило: %d (%.1f%%)%n",

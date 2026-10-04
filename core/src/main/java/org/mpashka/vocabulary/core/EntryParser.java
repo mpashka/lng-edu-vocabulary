@@ -54,12 +54,15 @@ public final class EntryParser {
                     keywords.stream().map(Russian::renderStress).toList(), List.of()));
         }
 
+        String rendered = Serbian.renderAccents(headword);
+        PartOfSpeech partOfSpeech = PartOfSpeechRules.detect(marks, chunks);
         return new Entry(
                 name,
-                Serbian.renderAccents(headword),
+                rendered,
                 Serbian.renderAccents(Serbian.toLatin(headword)),
                 marks,
-                PartOfSpeechRules.detect(marks, chunks),
+                partOfSpeech != PartOfSpeech.UNKNOWN ? partOfSpeech
+                        : PartOfSpeechRules.detectByMeaning(rendered, body.senses),
                 body.senses,
                 body.idioms,
                 WordStatus.IMPORTED);
