@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Словоформы, выписанные в самой статье исходного словаря.
@@ -21,12 +22,11 @@ import java.util.Optional;
  *
  * <p>🚨 <b>Скрытая часть формы даёт буквы, видимая — ударение.</b> Сокращённая запись
  * прячет начало формы: тильда стоит вместо основы ({@code ~ости}), дефис — вместо
- * начала слова ({@code -зу’јем}). Буквы спрятанного берутся из заглавного слова, а его
- * тон — нет: тон словоформы совпадает с тоном заглавного слова лишь в 16,4 % случаев,
- * и перенести его на форму значило бы выдумать ударение. Поэтому ударение получает
- * только форма, у которой тон <b>напечатан</b>: целиком выписанная ({@code абажу’ра})
- * либо сокращённая, но с тоном в видимой части ({@code пи“п||авац, ~а’вца} →
- * {@code пипа’вца}).
+ * начала слова ({@code -зу’јем}). Буквы спрятанного берутся из заглавного слова. Достоверное
+ * ударение получает только форма, у которой тон <b>напечатан</b>: целиком выписанная
+ * ({@code абажу’ра}) либо сокращённая, но с тоном в видимой части ({@code пи“п||авац,
+ * ~а’вца} → {@code пипа’вца}). Форме без напечатанного тона тон основы даёт
+ * {@link #stemTone} — это вывод, а не запись словаря, и источник у него другой.
  *
  * <p>Проверка на выходе одна: в сербском слове тон ровно один. Вышло два или ни одного —
  * ударение неизвестно, и форма остаётся с одними буквами. Выдуманное ударение хуже
@@ -218,6 +218,45 @@ public final class SourceForms {
         return new Form(grammar, value, Accent.toneCount(rendered) == 1
                 ? Optional.of(rendered.trim())
                 : Optional.empty());
+    }
+
+    /**
+     * Пометы, на которых тон основы сверен с викисловарём: родительный 304 из 309, настоящее
+     * время 39 из 39. Формы родов прилагательного викисловарь не даёт — сверять не с чем.
+     */
+    private static final Set<String> STEM_TONE_CHECKED = Set.of("gen.sg", "praes.1sg");
+
+    /**
+     * Тон формы, у которой словарь его не напечатал: тон заглавного слова над общим с формой
+     * началом. Сокращённая запись прячет неизменную часть слова, и тон в ней по замыслу
+     * словаря тот же. Долгота не переносится: в форме она меняется ({@code бо̏ле̄ст →
+     * бо̏лести}, {@code ба̏лавац → ба̏ла̄вца}). Пусто, если тон стоит дальше общего начала
+     * или помета не сверена ({@link #STEM_TONE_CHECKED}). Сверка —
+     * [docs/implementation/wiktionary.md], «Тон основы».
+     */
+    public static Optional<String> stemTone(String headword, Form form) {
+        return STEM_TONE_CHECKED.contains(form.grammar()) ? stemTone(headword, form.value()) : Optional.empty();
+    }
+
+    static Optional<String> stemTone(String headword, String formPlain) {
+        StringBuilder result = new StringBuilder();
+        int letter = 0;
+        boolean toneCopied = false;
+        for (int i = 0; i < headword.length() && letter < formPlain.length(); i++) {
+            char ch = headword.charAt(i);
+            Optional<Accent> accent = Accent.fromCombining(ch);
+            if (accent.isPresent()) {
+                if (accent.get().isTone()) {
+                    result.append(ch);
+                    toneCopied = true;
+                }
+            } else if (Character.toLowerCase(ch) == Character.toLowerCase(formPlain.charAt(letter))) {
+                result.append(formPlain.charAt(letter++));
+            } else {
+                break;
+            }
+        }
+        return toneCopied ? Optional.of(result + formPlain.substring(letter)) : Optional.empty();
     }
 
     private static List<Form> one(Optional<Form> form) {

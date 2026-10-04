@@ -114,4 +114,39 @@ class SourceFormsTest {
     void otherPartsOfSpeechHaveNoForms() {
         assertThat(formsOf("за$C#предл$#.#за$RV#.#")).isEmpty();
     }
+
+    @Nested
+    class StemTone {
+
+        private static String nfd(String value) {
+            return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD);
+        }
+
+        @Test
+        @DisplayName("тон основы переходит на форму, долгота — нет: в форме она меняется")
+        void toneWithoutLength() {
+            assertThat(SourceForms.stemTone(nfd("бо̏ле̄ст"), "болести")).contains(nfd("бо̏лести"));
+            assertThat(SourceForms.stemTone(nfd("бѐзбедно̄ст"), "безбедности")).contains(nfd("бѐзбедности"));
+        }
+
+        @Test
+        @DisplayName("беглое «а» за тоном не мешает: тон стоит в общем начале")
+        void fleetingA() {
+            assertThat(SourceForms.stemTone(nfd("ба̏лавац"), "балавца")).contains(nfd("ба̏лавца"));
+        }
+
+        @Test
+        @DisplayName("на несверенной помете тон основы не выводится: форм родов викисловарь не даёт")
+        void onlyCheckedGrammar() {
+            assertThat(SourceForms.stemTone(nfd("бо̏ле̄ст"), new Form("gen.sg", "болести"))).isPresent();
+            assertThat(SourceForms.stemTone(nfd("абеце̏дан"), new Form("adj", "абецедна"))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("буквы разошлись раньше тона — тона нет")
+        void toneOutsideCommonStart() {
+            assertThat(SourceForms.stemTone(nfd("човѐк"), "људи")).isEmpty();
+            assertThat(SourceForms.stemTone("за", "за")).isEmpty();
+        }
+    }
 }

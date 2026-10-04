@@ -1,8 +1,6 @@
 package org.mpashka.vocabulary.importer;
 
-import org.mpashka.vocabulary.core.Accent;
 import org.mpashka.vocabulary.core.Form;
-import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.Serbian;
 import org.mpashka.vocabulary.core.WiktionaryEntry;
 import org.mpashka.vocabulary.importer.WiktionaryMatch.OurForm;
@@ -31,10 +29,6 @@ import java.util.Set;
 // @tag:wiktionary @tag:accent
 public final class WiktionaryAccents {
 
-    /** Служебные слова: викисловарь даёт им ударение при переносе на них ({@code ȉz grada}). */
-    private static final Set<PartOfSpeech> UNSTRESSED_PARTS =
-            Set.of(PartOfSpeech.PREPOSITION, PartOfSpeech.CONJUNCTION, PartOfSpeech.PARTICLE);
-
     /** Пометы, которые умеет назвать интерфейс (frontend/src/labels.js). */
     private static final String SHOWN_GRAMMAR = "(nom|gen|dat|acc|voc|loc|ins)\\.(sg|pl)|praes\\.1sg";
 
@@ -51,28 +45,18 @@ public final class WiktionaryAccents {
             try (var w = new Writers(pg)) {
                 for (OurWord word : words) {
                     Optional<WiktionaryEntry> entry = WiktionaryMatch.matching(word, wiktionary);
-                    if (entry.isPresent() && maybeFunctionWord(word, wiktionary)) {
-                        counters.functionWordSkipped++;
-                    } else if (entry.isPresent()) {
-                        apply(word, entry.get(), w, counters);
+                    if (entry.isPresent()) {
+                        WiktionaryMatch.Identity identity = WiktionaryMatch.identity(word, entry.get());
+                        counters.identities.merge(identity, 1, Integer::sum);
+                        if (identity != WiktionaryMatch.Identity.UNANCHORED) {
+                            apply(word, entry.get(), identity == WiktionaryMatch.Identity.SAME, w, counters);
+                        }
                     }
                 }
             }
             pg.commit();
             counters.print();
         }
-    }
-
-    /**
-     * Заглавное слово без тона, у которого в викисловаре есть служебное слово с теми же буквами
-     * ({@code око}, {@code преко}, {@code из}): словарь писал без тона именно служебное, а
-     * часть речи ему наши правила дали неверно. Ударение существительного ему выдумало бы
-     * ударение.
-     */
-    private static boolean maybeFunctionWord(OurWord word, Map<String, List<WiktionaryEntry>> wiktionary) {
-        return Accent.toneCount(word.headword()) == 0
-                && wiktionary.getOrDefault(word.title().toLowerCase(), List.of()).stream()
-                .anyMatch(e -> UNSTRESSED_PARTS.contains(e.partOfSpeech()));
     }
 
     private static void removePrevious(Connection pg) throws SQLException {
@@ -89,7 +73,9 @@ public final class WiktionaryAccents {
         }
     }
 
-    private static void apply(OurWord word, WiktionaryEntry entry, Writers w, Counters c) throws SQLException {
+    /** У другого слова или при разночтении сверяется только заглавное: его формы не наши. */
+    private static void apply(OurWord word, WiktionaryEntry entry, boolean sameWord, Writers w, Counters c)
+            throws SQLException {
         String url = WiktionaryMatch.url(entry);
         Map<String, List<Form>> theirsByKey = WiktionaryMatch.formsByKey(entry);
         Map<String, String> ourPlainByLetters = new HashMap<>();
@@ -98,16 +84,12 @@ public final class WiktionaryAccents {
             ourPlainByLetters.putIfAbsent(Serbian.toLatin(ours.plain()).toLowerCase(), ours.plain());
             List<String> accented = WiktionaryMatch.accentsOn(ours.plain(),
                     theirsByKey.getOrDefault(ours.latinKey(), List.of()));
-            if (accented.isEmpty() || !handled.add(ours.latinKey())) {
+            if (accented.isEmpty() || !handled.add(ours.latinKey()) || !sameWord && !ours.grammar().equals("nom.sg")) {
                 continue;
             }
             List<OurForm> group = WiktionaryMatch.group(word, ours);
             List<OurForm> stressed = group.stream().filter(f -> f.accentSource() != null).toList();
             if (stressed.isEmpty()) {
-                if (ours.grammar().equals("nom.sg") && UNSTRESSED_PARTS.contains(word.partOfSpeech())) {
-                    c.unstressedSkipped++;
-                    continue;
-                }
                 w.setAccent(ours.id(), accented.getFirst(), url);
                 c.filled++;
                 addVariants(word, ours, accented.subList(1, accented.size()), url, w, c);
@@ -123,7 +105,9 @@ public final class WiktionaryAccents {
                 c.discrepancies++;
             }
         }
-        addFormsUnderOtherGrammar(word, entry, ourPlainByLetters, url, w, c);
+        if (sameWord) {
+            addFormsUnderOtherGrammar(word, entry, ourPlainByLetters, url, w, c);
+        }
     }
 
     private static void addVariants(OurWord word, OurForm ours, List<String> variants, String url, Writers w,
@@ -228,12 +212,13 @@ public final class WiktionaryAccents {
         int otherGrammar;
         int agreed;
         int discrepancies;
-        int unstressedSkipped;
-        int functionWordSkipped;
+        final Map<WiktionaryMatch.Identity, Integer> identities = new java.util.EnumMap<>(WiktionaryMatch.Identity.class);
         int lettersMissing;
         int grammarNotShown;
 
         void print() {
+            System.out.printf("Слова викисловаря той же части речи:%n");
+            identities.forEach((identity, n) -> System.out.printf("  %-38s %,7d%n", identity.title, n));
             System.out.printf("Ударение из викисловаря записано:%n");
             System.out.printf("  формам без ударения:                  %,7d%n", filled);
             System.out.printf("  допустимым вариантам — новыми формами: %,7d%n", variants);
@@ -241,8 +226,6 @@ public final class WiktionaryAccents {
             System.out.printf("Совпало с нашим ударением:              %,7d%n", agreed);
             System.out.printf("Расхождений в discrepancy:              %,7d%n", discrepancies);
             System.out.printf("Не записано:%n");
-            System.out.printf("  служебные слова (безударные):          %,7d%n", unstressedSkipped);
-            System.out.printf("  без тона, а в викисловаре служебное:   %,7d слов%n", functionWordSkipped);
             System.out.printf("  букв у нас нет — нечем записать:       %,7d%n", lettersMissing);
             System.out.printf("  помету интерфейс не покажет:           %,7d%n", grammarNotShown);
         }

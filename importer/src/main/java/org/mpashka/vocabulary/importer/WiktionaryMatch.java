@@ -132,6 +132,43 @@ final class WiktionaryMatch {
                 .flatMap(a -> Serbian.withLatinAccents(cyrillicPlain, a).stream()).distinct().toList();
     }
 
+    /** Насколько мы уверены, что слово викисловаря — то же, что наше. */
+    enum Identity {
+        /** Заглавное ударение совпало либо это имя собственное: формы можно брать. */
+        SAME("то же слово"),
+        /** Заглавное ударение разошлось: другое слово или разночтение — формы не берутся. */
+        HEADWORD_DIFFERS("заглавное ударение разошлось"),
+        /**
+         * Сверить не по чему: у нас или у викисловаря заглавное слово без тона. Совпадения
+         * букв и части речи мало — {@code бег} «бегство» нашлось бы как {@code bȇg} «бей».
+         */
+        UNANCHORED("сверить не по чему");
+
+        final String title;
+
+        Identity(String title) {
+            this.title = title;
+        }
+    }
+
+    static Identity identity(OurWord word, WiktionaryEntry entry) {
+        Optional<OurForm> nominative = word.forms().stream().filter(f -> f.grammar().equals("nom.sg")).findFirst();
+        if (nominative.isEmpty()) {
+            return Identity.UNANCHORED;
+        }
+        List<OurForm> group = group(word, nominative.get());
+        List<String> accented = accentsOn(nominative.get().plain(),
+                formsByKey(entry).getOrDefault(nominative.get().latinKey(), List.of()));
+        if (group.stream().allMatch(f -> f.accentSource() == null)) {
+            return Character.isUpperCase(word.headword().charAt(0)) && !accented.isEmpty()
+                    ? Identity.SAME : Identity.UNANCHORED;
+        }
+        if (accented.isEmpty()) {
+            return Identity.UNANCHORED;
+        }
+        return groupAgrees(group, accented) ? Identity.SAME : Identity.HEADWORD_DIFFERS;
+    }
+
     /** Наши формы с той же пометой и теми же буквами: заглавная форма и её варианты ударения. */
     static List<OurForm> group(OurWord word, OurForm ours) {
         return word.forms().stream().filter(f -> f.latinKey().equals(ours.latinKey())).toList();

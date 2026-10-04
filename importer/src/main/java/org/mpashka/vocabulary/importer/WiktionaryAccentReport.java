@@ -1,6 +1,5 @@
 package org.mpashka.vocabulary.importer;
 
-import org.mpashka.vocabulary.core.Accent;
 import org.mpashka.vocabulary.core.Form;
 import org.mpashka.vocabulary.core.PartOfSpeech;
 import org.mpashka.vocabulary.core.Serbian;
@@ -82,9 +81,14 @@ public final class WiktionaryAccentReport {
     }
 
     private static void compare(OurWord word, WiktionaryEntry entry, Counters c, boolean detailed) {
+        WiktionaryMatch.Identity identity = WiktionaryMatch.identity(word, entry);
+        c.identities.merge(word.partOfSpeech() + " " + identity.name(), 1, Integer::sum);
         if (detailed) {
-            System.out.printf("%n%s (%s) — викисловарь: %s%n", word.headword(), word.partOfSpeech().title(),
-                    entry.headword().orElse("без ударения"));
+            System.out.printf("%n%s (%s) — викисловарь: %s, %s%n", word.headword(), word.partOfSpeech().title(),
+                    entry.headword().orElse("без ударения"), identity.title);
+        }
+        if (identity == WiktionaryMatch.Identity.UNANCHORED) {
+            return;
         }
         Map<String, List<Form>> byKey = WiktionaryMatch.formsByKey(entry);
         c.wiktionaryForms[word.partOfSpeech().ordinal()] += entry.forms().size();
@@ -101,6 +105,9 @@ public final class WiktionaryAccentReport {
             }
         }
         for (OurForm ours : word.forms()) {
+            if (identity != WiktionaryMatch.Identity.SAME && !ours.grammar().equals("nom.sg")) {
+                continue;
+            }
             List<Form> theirs = byKey.getOrDefault(ours.latinKey(), List.of());
             List<String> accented = WiktionaryMatch.accentsOn(ours.plain(), theirs);
             Outcome outcome = outcome(word, ours, theirs, accented);
@@ -111,9 +118,9 @@ public final class WiktionaryAccentReport {
                         Optional.ofNullable(ours.form()).filter(f -> ours.accentSource() != null).orElse("—"),
                         accented.isEmpty() ? "—" : String.join(" / ", accented), outcome.title);
             }
-            if (outcome == Outcome.DISAGREE || outcome == Outcome.TILDE_DISAGREE || outcome == Outcome.TILDE_AGREE) {
+            if (outcome == Outcome.DISAGREE || outcome == Outcome.STEM_TONE_DISAGREE || outcome == Outcome.STEM_TONE_AGREE) {
                 c.sample(outcome, String.format("%s %s: наше %s, викисловарь %s", word.headword(), ours.grammar(),
-                        outcome == Outcome.DISAGREE ? ours.form() : stemAccented(word, ours).orElse("?"),
+                        ours.form(),
                         String.join(" / ", accented)));
             }
         }
@@ -125,9 +132,9 @@ public final class WiktionaryAccentReport {
         AGREE("совпало"),
         DISAGREE("разошлось"),
         GAIN_RULES("ударение для формы правил"),
-        TILDE_AGREE("тильда: ударение основы подтвердилось"),
-        TILDE_DISAGREE("тильда: ударение основы не подтвердилось"),
-        TILDE_UNKNOWN("тильда: тон основы вне общей части");
+        STEM_TONE_AGREE("тон основы подтвердился"),
+        STEM_TONE_DISAGREE("тон основы не подтвердился"),
+        STEM_TONE_UNKNOWN("словарь без тона, тон основы не вывести");
 
         private final String title;
 
@@ -143,43 +150,14 @@ public final class WiktionaryAccentReport {
         if (accented.isEmpty()) {
             return Outcome.NOT_ACCENTED;
         }
+        boolean agrees = WiktionaryMatch.groupAgrees(WiktionaryMatch.group(word, ours), accented);
+        if ("RULES".equals(ours.accentSource())) {
+            return agrees ? Outcome.STEM_TONE_AGREE : Outcome.STEM_TONE_DISAGREE;
+        }
         if (ours.accentSource() != null) {
-            return WiktionaryMatch.groupAgrees(WiktionaryMatch.group(word, ours), accented)
-                    ? Outcome.AGREE : Outcome.DISAGREE;
+            return agrees ? Outcome.AGREE : Outcome.DISAGREE;
         }
-        if (!ours.source().equals("SOURCE_DICTIONARY")) {
-            return Outcome.GAIN_RULES;
-        }
-        Optional<String> predicted = stemAccented(word, ours);
-        if (predicted.isEmpty()) {
-            return Outcome.TILDE_UNKNOWN;
-        }
-        return accented.stream().anyMatch(a -> WiktionaryMatch.sameTone(a, predicted.get()))
-                ? Outcome.TILDE_AGREE : Outcome.TILDE_DISAGREE;
-    }
-
-    /**
-     * Гипотеза о тильде: форма читается с ударением основы — знаки заглавного слова над общим
-     * с формой началом. Пусто, если тон заглавного слова стоит дальше общего начала.
-     */
-    private static Optional<String> stemAccented(OurWord word, OurForm ours) {
-        String headword = word.headword();
-        StringBuilder result = new StringBuilder();
-        int letter = 0;
-        boolean toneCopied = false;
-        for (int i = 0; i < headword.length() && letter < ours.plain().length(); i++) {
-            char ch = headword.charAt(i);
-            if (Accent.fromCombining(ch).isPresent()) {
-                result.append(ch);
-                toneCopied |= Accent.fromCombining(ch).get().isTone();
-                continue;
-            }
-            if (Character.toLowerCase(ch) != Character.toLowerCase(ours.plain().charAt(letter))) {
-                break;
-            }
-            result.append(ours.plain().charAt(letter++));
-        }
-        return toneCopied ? Optional.of(result + ours.plain().substring(letter)) : Optional.empty();
+        return ours.source().equals("SOURCE_DICTIONARY") ? Outcome.STEM_TONE_UNKNOWN : Outcome.GAIN_RULES;
     }
 
     private static double percent(int part, int whole) {
@@ -191,6 +169,7 @@ public final class WiktionaryAccentReport {
         final int[] wiktionaryForms = new int[PartOfSpeech.values().length];
         final int[] missing = new int[2];
         final Map<String, Integer> outcomes = new TreeMap<>();
+        final Map<String, Integer> identities = new TreeMap<>();
         final Map<Outcome, List<String>> samples = new TreeMap<>();
 
         static int[] add(int[] a, int[] b) {
@@ -206,8 +185,11 @@ public final class WiktionaryAccentReport {
 
         void print() {
             System.out.printf("%nНаши слова, у которых в викисловаре есть слово той же части речи:%n");
-            words.forEach((part, c) -> System.out.printf("  %-14s %,7d из %,7d  %4.1f%%%n",
-                    part.title(), c[1], c[0], percent(c[1], c[0])));
+            words.forEach((part, c) -> System.out.printf("  %-14s %,7d из %,7d  %4.1f%%   %s%n",
+                    part.title(), c[1], c[0], percent(c[1], c[0]),
+                    String.join(", ", java.util.Arrays.stream(WiktionaryMatch.Identity.values())
+                            .map(i -> i.title + " " + identities.getOrDefault(part + " " + i.name(), 0)).toList())));
+            System.out.printf("Словоформы сверяются только у того же слова, заглавное — ещё и при расхождении.%n");
             System.out.printf("%nНаши формы этих слов по исходу сверки:%n");
             for (PartOfSpeech part : words.keySet()) {
                 int total = outcomes.entrySet().stream().filter(e -> e.getKey().startsWith(part + " "))

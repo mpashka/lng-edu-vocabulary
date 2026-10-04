@@ -20,6 +20,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -63,8 +64,8 @@ public final class MigrateToPostgres {
             System.out.printf("Переводов:              %d%n", counters.translations);
             System.out.printf("Примеров и оборотов:    %d%n", counters.examples);
             System.out.printf("Словоформ для поиска:    %d%n", counters.forms);
-            System.out.printf("  выписаны в словаре:     %d, из них с ударением: %d%n",
-                    counters.sourceForms, counters.sourceAccents);
+            System.out.printf("  выписаны в словаре:     %d, из них с ударением: %d, с тоном основы: %d%n",
+                    counters.sourceForms, counters.sourceAccents, counters.stemTones);
             System.out.printf("%nРазделено омонимов: %d статей -> %d слов%n",
                     counters.homonymEntries, counters.homonymWords);
             System.out.printf("%nТребуют языковой доработки: %d (%.1f%%)%n",
@@ -186,13 +187,18 @@ public final class MigrateToPostgres {
             if (!written.add(form.value())) {
                 continue;
             }
-            String accent = form.accented().orElse(null);
-            w.insertForm(wordId, accent, form.value(), form.grammar(),
-                    "SOURCE_DICTIONARY", accent == null ? null : "SOURCE_DICTIONARY", true);
+            Optional<String> stemTone = form.accented().isPresent() ? Optional.empty()
+                    : SourceForms.stemTone(entry.headword(), form);
+            String accentSource = form.accented().isPresent() ? "SOURCE_DICTIONARY"
+                    : stemTone.isPresent() ? "RULES" : null;
+            w.insertForm(wordId, form.accented().or(() -> stemTone).orElse(null), form.value(), form.grammar(),
+                    "SOURCE_DICTIONARY", accentSource, true);
             c.forms++;
             c.sourceForms++;
-            if (accent != null) {
+            if (form.accented().isPresent()) {
                 c.sourceAccents++;
+            } else if (stemTone.isPresent()) {
+                c.stemTones++;
             }
         }
         for (Form form : WordForms.searchForms(entry, gender, chunks)) {
@@ -351,6 +357,7 @@ public final class MigrateToPostgres {
         int forms;
         int sourceForms;
         int sourceAccents;
+        int stemTones;
         int needsReview;
         int homonymEntries;
         int homonymWords;
