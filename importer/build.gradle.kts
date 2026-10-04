@@ -84,3 +84,12 @@ tasks.register<JavaExec>("wiktionaryPartsOfSpeech") {
     maxHeapSize = "2g"
     mustRunAfter("migrate")
 }
+
+// Ударение заглавного слова из hjp.znanje.hr по выверенному списку — после викисловаря.
+tasks.register<JavaExec>("hjpAccents") {
+    group = "application"
+    description = "Записывает ударения HJP из importer/src/main/resources/hjp-accents.tsv"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.mpashka.vocabulary.importer.HjpAccents"
+    mustRunAfter("migrate", "wiktionaryAccents")
+}

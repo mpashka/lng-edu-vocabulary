@@ -87,6 +87,13 @@ const statusClassOf = (w) => statusKey(w?.status)
 
 /** Подпись формы в выбранном виде: по-русски, по-сербски, и так и так, либо кодом. */
 const formLabel = (grammar) => labelOf(grammar, formLabels.value)
+const linkedAccentSources = {
+  WIKTIONARY: { name: 'викисловарь', title: 'Ударение взято из викисловаря (CC BY-SA) — открыть статью' },
+  HJP: {
+    name: 'HJP',
+    title: 'Ударение взято из Hrvatski jezični portal — хорватская норма, у сербской возможны расхождения. Открыть статью'
+  }
+}
 const caseExample = {
   nom: 'Это …', gen: 'Нет …', dat: 'Помогаю …', acc: 'Люблю …',
   voc: 'Эй, …!', ins: 'Играю с …', loc: 'Говорю о …'
@@ -209,13 +216,13 @@ const backToSearch = computed(() => {
               <span class="form-label">{{ formLabel(form.grammar) }}</span>
               <Accented :text="form.form" />
               <a
-                v-if="form.accentSource === 'WIKTIONARY' && form.accentUrl"
+                v-if="linkedAccentSources[form.accentSource] && form.accentUrl"
                 class="accent-source"
                 :href="form.accentUrl"
                 target="_blank"
                 rel="noopener"
-                title="Ударение взято из викисловаря (CC BY-SA) — открыть статью"
-              >викисловарь</a>
+                :title="linkedAccentSources[form.accentSource].title"
+              >{{ linkedAccentSources[form.accentSource].name }}</a>
               <small
                 v-else-if="form.accentSource === 'RULES'"
                 class="accent-source"

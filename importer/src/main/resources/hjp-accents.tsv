@@ -1,0 +1,16 @@
+# Ударение заглавного слова из Hrvatski jezični portal (hjp.znanje.hr), записывает
+# ./gradlew :importer:hjpAccents. Статья выбрана по толкованию, а не по буквам: у HJP
+# под одними буквами бывает несколько статей (Àmur — река, àmūr — рыба).
+# Столбцы: наше заглавное без ударения, заглавное HJP с ударением, статья, толкование HJP.
+# Буенос Ајрес — ударение из произношения статьи (izg. bùenos ájres): HJP пишет Buenos Aires.
+Авала	Àvala	https://hjp.znanje.hr/index.php?show=search_by_id&id=e1tvUQ%3D%3D&keyword=Avala	planina u neposrednoj blizini Beograda
+Албанија	Àlbānija	https://hjp.znanje.hr/index.php?show=search_by_id&id=f1dgWA%3D%3D&keyword=Albanija	država u JZ dijelu Balkanskog poluotoka
+Алтај	Àltaj	https://hjp.znanje.hr/index.php?show=search_by_id&id=fFxmXg%3D%3D&keyword=Altaj	gorje u sred. Aziji
+Аму-Дарја	Ȁmu-Dárja	https://hjp.znanje.hr/index.php?show=search_by_id&id=fFhkUA%3D%3D&keyword=Amu-Darja	rijeka u srednjoj Aziji
+Амур	Àmur	https://hjp.znanje.hr/index.php?show=search_by_id&id=fFhlXQ%3D%3D&keyword=Amur	rijeka u I Aziji
+Арктик	Àrktik	https://hjp.znanje.hr/index.php?show=search_by_id&id=eltjXg%3D%3D&keyword=Arktik	područje oko Sjevernog pola
+Буенос Ајрес	bùenos ájres	https://hjp.znanje.hr/index.php?show=search_by_id&id=f15uWBY%3D&keyword=Buenos+Aires	luka i glavni grad Argentine
+Индокина	Indokína	https://hjp.znanje.hr/index.php?show=search_by_id&id=fVpkXRU%3D&keyword=Indokina	veliki poluotok u JI Aziji
+Одра	Ȍdra	https://hjp.znanje.hr/index.php?show=search_by_id&id=eFtuXhI%3D&keyword=Odra	rijeka u Češkoj i Poljskoj
+Узбек	Ùzbek	https://hjp.znanje.hr/index.php?show=search_by_id&id=f19hWRd%2F&keyword=Uzbek	stanovnik ili državljanin Uzbekistana
+Урал	Ùrāl	https://hjp.znanje.hr/index.php?show=search_by_id&id=f19jUBR9&keyword=Ural	gorje u Rusiji; rijeka u Rusiji i Kazahstanu

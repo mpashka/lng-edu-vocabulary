@@ -133,7 +133,7 @@ GET /api/words/{name}
 
 `source` — откуда буквы формы, `accentSource` — откуда её ударение: `SOURCE_DICTIONARY`
 (напечатано в словаре), `WIKTIONARY` (тогда `accentUrl` — статья, всегда есть: условие
-CC BY-SA), `RULES` (тон основы, выведен правилом — предположительно), `null` — ударения нет.
+CC BY-SA), `HJP` (Hrvatski jezični portal, только заглавное слово; `accentUrl` есть всегда), `RULES` (тон основы, выведен правилом — предположительно), `null` — ударения нет.
 
 ```json
 { "form": "во̏ду", "grammar": "acc.sg", "source": "RULES", "rule": "noun-declension",

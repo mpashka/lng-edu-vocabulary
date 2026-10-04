@@ -1,5 +1,5 @@
 ---
-tags: "@tag:import @tag:source-db @tag:wiktionary"
+tags: "@tag:import @tag:source-db @tag:wiktionary @tag:hjp"
 ---
 
 # Перенос данных и отчёты
@@ -37,6 +37,9 @@ tags: "@tag:import @tag:source-db @tag:wiktionary"
   точности тем же прогоном, `./gradlew :importer:wiktionaryPartsOfSpeech`
 - `WiktionaryMatch.java` — сопоставление наших слов и форм со словами викисловаря, общее у
   сверки и записи
+- `HjpAccents.java` — ударение заглавного слова из hjp.znanje.hr по выверенному списку
+  `src/main/resources/hjp-accents.tsv`, `./gradlew :importer:hjpAccents`
+  ([sources.md](../docs/implementation/sources.md), «hjp.znanje.hr»)
 - `TargetDatabase.java` — подключение к Postgres из `secrets.properties`, общее у переноса и отчётов
 
 ## Отчёты о качестве правил

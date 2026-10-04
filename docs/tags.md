@@ -24,6 +24,7 @@ tags: "@tag:meta"
 | `@tag:word-forms` | Словоформы: правила образования и поиск по ним | [implementation/word-forms.md](implementation/word-forms.md), `core/*Declension`, `core/VerbConjugation` |
 | `@tag:word-roots` | Связи слова с русскими, сербскими и историческими корнями | `backend/PostgresDictionary` (таблица пока пуста) |
 | `@tag:wiktionary` | Викисловарь как источник: выгрузка, выписка сербохорватских разделов, разбор шаблонов, перенос ударения с латиницы | [implementation/wiktionary.md](implementation/wiktionary.md), `core/WiktionaryParser`, `importer/Wiktionary*` |
+| `@tag:hjp` | Hrvatski jezični portal как источник ударения: разбор ответа, выверенный список, запись в базу | [implementation/sources.md](implementation/sources.md), `importer/HjpAccents`, `V5__hjp_source.sql` |
 | `@tag:import` | Конвертация исходной базы в целевую | `importer/`, [testing/rules-reports.md](testing/rules-reports.md) |
 | `@tag:llm` | Пополнение словаря через LLM | [implementation/llm.md](implementation/llm.md) |
 | `@tag:book-import` | Импорт книги и двуязычный перевод | пока только план, этап 11 |

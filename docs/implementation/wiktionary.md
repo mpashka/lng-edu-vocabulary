@@ -156,8 +156,9 @@ ultimately from Proto-Indo-European *wódr̥.
 
 ### Запись в базу
 
-`./gradlew :importer:migrate :importer:wiktionaryPartsOfSpeech :importer:wiktionaryAccents` —
-порядок держит Gradle. Сначала часть речи словам, у которых правила её не определили
+`./gradlew :importer:migrate :importer:wiktionaryPartsOfSpeech :importer:wiktionaryAccents
+:importer:hjpAccents` — порядок держит Gradle; последний шаг — ударения HJP
+([sources.md](sources.md), «hjp.znanje.hr»). Сначала часть речи словам, у которых правила её не определили
 ([part-of-speech.md](part-of-speech.md), «Правило 4»): слову без части речи ударений не
 подобрать. Запись ударений идёт **после** переноса
 отдельным шагом: перенос начинается с `truncate` и стёр бы её. Шаг повторяем: сначала
