@@ -201,7 +201,7 @@ public final class MigrateToPostgres {
         Set<String> written = new HashSet<>();
         written.add(headwordPlain);
         w.insertForm(wordId, entry.headword(), headwordPlain, "nom.sg",
-                "SOURCE_DICTIONARY", "SOURCE_DICTIONARY", true);
+                "SOURCE_DICTIONARY", dictionaryAccentSource(entry.headword()), true);
         c.forms++;
         // Варианты ударения заглавного слова. Словарь выписывает их подряд
         // (го‛ра ж., го“ра ж.) — это допустимые произношения одного слова, и оба
@@ -211,7 +211,7 @@ public final class MigrateToPostgres {
             String rendered = Serbian.renderAccents(variant);
             if (!rendered.equals(entry.headword())) {
                 w.insertForm(wordId, rendered, headwordPlain, "nom.sg.вариант",
-                        "SOURCE_DICTIONARY", "SOURCE_DICTIONARY", false);
+                        "SOURCE_DICTIONARY", dictionaryAccentSource(rendered), false);
                 c.forms++;
                 c.accentVariants++;
             }
@@ -247,6 +247,10 @@ public final class MigrateToPostgres {
             w.insertForm(wordId, null, form.value(), form.grammar(), "RULES", null, false);
             c.forms++;
         }
+    }
+
+    private static String dictionaryAccentSource(String rendered) {
+        return Accent.toneCount(rendered) == 0 ? null : "SOURCE_DICTIONARY";
     }
 
     /**
