@@ -31,6 +31,10 @@ tags: "@tag:import @tag:source-db @tag:wiktionary"
   `./gradlew :importer:wiktionaryExtract`
 - `WiktionaryAccentReport.java` — сверка ударений викисловаря с базой, ничего не меняя,
   `./gradlew :importer:runWiktionaryAccents`
+- `WiktionaryAccents.java` — запись ударений викисловаря в базу после переноса, расхождения —
+  в `discrepancy`, `./gradlew :importer:wiktionaryAccents`
+- `WiktionaryMatch.java` — сопоставление наших слов и форм со словами викисловаря, общее у
+  сверки и записи
 - `TargetDatabase.java` — подключение к Postgres из `secrets.properties`, общее у переноса и отчётов
 
 ## Отчёты о качестве правил

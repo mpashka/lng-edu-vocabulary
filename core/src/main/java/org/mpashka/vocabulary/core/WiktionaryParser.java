@@ -1,6 +1,7 @@
 package org.mpashka.vocabulary.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ public final class WiktionaryParser {
             Map.entry("Proverb", PartOfSpeech.UNKNOWN));
 
     private static final String[] CASES = {"nom", "gen", "dat", "acc", "voc", "loc", "ins"};
+    private static final Pattern NAMED_CASE = Pattern.compile("([ngdavli])([sp])");
 
     private static final Map<String, String> CONJUGATION_TENSES = Map.of(
             "pr", "praes", "a", "aor", "impf", "impf", "impt", "imper",
@@ -117,11 +119,19 @@ public final class WiktionaryParser {
 
     /**
      * {@code sh-decl-noun} перечисляет пары «единственное | множественное» по семи падежам,
-     * {@code -unc} — только единственное, {@code -pl} — только множественное.
+     * {@code -unc} — только единственное, {@code -pl} — только множественное. Бывает и
+     * запись именами: {@code ns=zajam|gs=zajma|gp=zajmova}.
      */
     private static List<Form> declension(Template template) {
         List<String> values = template.positional;
         List<Form> forms = new ArrayList<>();
+        for (Map.Entry<String, String> parameter : template.named.entrySet()) {
+            Matcher name = NAMED_CASE.matcher(parameter.getKey());
+            if (name.matches()) {
+                String caseName = Arrays.stream(CASES).filter(c -> c.startsWith(name.group(1))).findFirst().orElseThrow();
+                addVariants(forms, caseName + "." + (name.group(2).equals("s") ? "sg" : "pl"), parameter.getValue());
+            }
+        }
         boolean paired = template.name.equals("sh-decl-noun");
         String singleNumber = template.name.endsWith("-pl") ? "pl" : "sg";
         for (int i = 0; i < values.size(); i++) {

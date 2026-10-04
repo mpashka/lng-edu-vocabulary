@@ -64,3 +64,13 @@ tasks.register<JavaExec>("runWiktionaryAccents") {
     mainClass = "org.mpashka.vocabulary.importer.WiktionaryAccentReport"
     maxHeapSize = "2g"
 }
+
+// Запись ударений викисловаря в базу — после переноса (этап 6, задача lev-79).
+tasks.register<JavaExec>("wiktionaryAccents") {
+    group = "application"
+    description = "Записывает ударения викисловаря в базу; расхождения — в discrepancy"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.mpashka.vocabulary.importer.WiktionaryAccents"
+    maxHeapSize = "2g"
+    mustRunAfter("migrate")
+}

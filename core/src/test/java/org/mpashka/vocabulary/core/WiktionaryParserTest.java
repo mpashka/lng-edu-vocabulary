@@ -143,6 +143,29 @@ class WiktionaryParserTest {
     }
 
     @Test
+    @DisplayName("склонение, записанное именами параметров, разбирается так же, как перечисленное")
+    void namedDeclension() {
+        String zajam = """
+                ==Serbo-Croatian==
+                ===Noun===
+                {{sh-noun||m-in}}
+                ====Declension====
+                {{sh-decl-noun
+                |ns=zajam
+                |np=zajmovi
+                |gs=zajma
+                |is=zajmom
+                |ip=zajmovima}}
+                """;
+
+        WiktionaryEntry entry = WiktionaryParser.serboCroatian("zajam", zajam).getFirst();
+
+        assertThat(entry.headword()).isEmpty();
+        assertThat(entry.forms()).containsExactlyInAnyOrder(new Form("nom.sg", "zajam"), new Form("nom.pl", "zajmovi"),
+                new Form("gen.sg", "zajma"), new Form("ins.sg", "zajmom"), new Form("ins.pl", "zajmovima"));
+    }
+
+    @Test
     @DisplayName("нет сербохорватского раздела — нет и слов")
     void noSection() {
         assertThat(WiktionaryParser.serboCroatian("abažur", "==Slovak==\n{{sk-noun|m}}\n")).isEmpty();
