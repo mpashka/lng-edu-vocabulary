@@ -156,7 +156,10 @@ ultimately from Proto-Indo-European *wódr̥.
 
 ### Запись в базу
 
-`./gradlew :importer:migrate :importer:wiktionaryAccents` — запись идёт **после** переноса
+`./gradlew :importer:migrate :importer:wiktionaryPartsOfSpeech :importer:wiktionaryAccents` —
+порядок держит Gradle. Сначала часть речи словам, у которых правила её не определили
+([part-of-speech.md](part-of-speech.md), «Правило 4»): слову без части речи ударений не
+подобрать. Запись ударений идёт **после** переноса
 отдельным шагом: перенос начинается с `truncate` и стёр бы её. Шаг повторяем: сначала
 снимает записанное прошлым прогоном (строки с `source = WIKTIONARY`, ударения с
 `accent_source = WIKTIONARY`, неразобранные расхождения от викисловаря), потом пишет

@@ -72,5 +72,15 @@ tasks.register<JavaExec>("wiktionaryAccents") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.mpashka.vocabulary.importer.WiktionaryAccents"
     maxHeapSize = "2g"
+    mustRunAfter("migrate", "wiktionaryPartsOfSpeech")
+}
+
+// Часть речи из викисловаря словам, у которых правила её не определили — до записи ударений.
+tasks.register<JavaExec>("wiktionaryPartsOfSpeech") {
+    group = "application"
+    description = "Определяет часть речи по викисловарю там, где правила не справились"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.mpashka.vocabulary.importer.WiktionaryPartsOfSpeech"
+    maxHeapSize = "2g"
     mustRunAfter("migrate")
 }
