@@ -1,5 +1,5 @@
 ---
-tags: "@tag:part-of-speech @tag:word-forms @tag:import @tag:source-db"
+tags: "@tag:part-of-speech @tag:word-forms @tag:import @tag:source-db @tag:wiktionary"
 ---
 
 # Прогоны правил на исходной базе
@@ -20,6 +20,7 @@ tags: "@tag:part-of-speech @tag:word-forms @tag:import @tag:source-db"
 | `./gradlew :importer:run` | часть речи вслепую: помету скрывают и смотрят, восстановит ли её строение слова (29 127 статей с пометой) | покрытие **99,7 %**, точность строения 97,9 %; глаголы 6 167 из 6 167 |
 | `./gradlew :importer:runNounForms` | порождённый родительный падеж против выписанного в словаре | **96,8 %** при 1,9 варианта на слово |
 | `./gradlew :importer:runVerbForms` | порождённое настоящее время против выписанного | **91,6 %** при 2,49 варианта |
+| `./gradlew :importer:runWiktionaryAccents` | ударения викисловаря против нашей базы: покрытие, совпадение с выписанными, гипотеза о тильде; аргументы — слова для подробного показа | выписанные словоформы совпали в **94,7 %**; разбор — [wiktionary.md](../implementation/wiktionary.md), «Сверка с нашей базой» |
 | `./gradlew :importer:runAdjectiveForms` | сколько форм родов есть готовыми и что добирают правила | формы выписаны у 7 615 статей из 7 685; правила как запасной ход — 96,0 % |
 
 Разбор чисел и решений, которые из них следуют: [../implementation/part-of-speech.md](../implementation/part-of-speech.md)

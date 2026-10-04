@@ -1,5 +1,7 @@
 package org.mpashka.vocabulary.core;
 
+import java.util.Optional;
+
 /**
  * Сербское ударение. В сербском языке четыре тона плюс заударная долгота.
  *
@@ -76,6 +78,15 @@ public enum Accent {
             }
         }
         return count;
+    }
+
+    public static Optional<Accent> fromCombining(char mark) {
+        for (Accent accent : values()) {
+            if (accent.combining == mark) {
+                return Optional.of(accent);
+            }
+        }
+        return Optional.empty();
     }
 
     /** Ударение по знаку из исходной базы либо {@code null}, если знак не ударение. */

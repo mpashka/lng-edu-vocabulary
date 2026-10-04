@@ -23,6 +23,7 @@ tags: "@tag:meta"
 | `@tag:part-of-speech` | Определение части речи | [implementation/part-of-speech.md](implementation/part-of-speech.md), `core/PartOfSpeechRules` |
 | `@tag:word-forms` | Словоформы: правила образования и поиск по ним | [implementation/word-forms.md](implementation/word-forms.md), `core/*Declension`, `core/VerbConjugation` |
 | `@tag:word-roots` | Связи слова с русскими, сербскими и историческими корнями | `backend/PostgresDictionary` (таблица пока пуста) |
+| `@tag:wiktionary` | Викисловарь как источник: выгрузка, выписка сербохорватских разделов, разбор шаблонов, перенос ударения с латиницы | [implementation/wiktionary.md](implementation/wiktionary.md), `core/WiktionaryParser`, `importer/Wiktionary*` |
 | `@tag:import` | Конвертация исходной базы в целевую | `importer/`, [testing/rules-reports.md](testing/rules-reports.md) |
 | `@tag:llm` | Пополнение словаря через LLM | [implementation/llm.md](implementation/llm.md) |
 | `@tag:book-import` | Импорт книги и двуязычный перевод | пока только план, этап 11 |

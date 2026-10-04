@@ -1,5 +1,5 @@
 ---
-tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms"
+tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms @tag:wiktionary"
 ---
 
 # Ядро словаря
@@ -12,7 +12,7 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms"
 `importer` и `backend`.
 
 Код: `src/main/java/org/mpashka/vocabulary/core/`, тесты: `src/test/java/…` —
-87 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
+99 проверок, [../docs/testing/unit-tests.md](../docs/testing/unit-tests.md).
 
 ## Разбор исходной разметки
 
@@ -30,6 +30,9 @@ tags: "@tag:markup @tag:accent @tag:part-of-speech @tag:word-forms"
   комбинируемые знаки Unicode
 - `Serbian.java` — кириллица → латиница и показ ударений; кириллица со знаками —
   канонический вид слова
+- `WiktionaryParser.java`, `WiktionaryEntry.java` — сербохорватский раздел статьи
+  викисловаря: заглавное слово с частью речи, формы склонения и спряжения, предки
+  ([wiktionary.md](../docs/implementation/wiktionary.md))
 - `Russian.java` — русский текст исходной базы: ударение записано U+2019 после гласной
 
 ## Языковые правила

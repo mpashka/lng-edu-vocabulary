@@ -63,4 +63,27 @@ class SerbianTest {
     void stripsAccents() {
         assertThat(Serbian.stripAccents("ju‛na_k")).isEqualTo("junak");
     }
+
+    @ParameterizedTest(name = "{0} + {1} → {2}")
+    @CsvSource({
+            "воду,   vȍdu,    во̏ду",
+            "кућа,   kúća,    ку́ћа",
+            "љубав,  ljȕbav,  љу̏бав",
+            "џеп,    džȅp,    џе̏п",
+            "радећи, rádēći,  ра́де̄ћи",
+            "прст,   pȑst,    пр̏ст",
+            "Африка, Áfrika,  А́фрика",
+    })
+    @DisplayName("ударение с латинской записи ложится на кириллические буквы, ć ударением не считается")
+    void placesLatinAccentsOnCyrillic(String cyrillic, String latin, String expected) {
+        assertThat(Serbian.withLatinAccents(cyrillic, latin))
+                .contains(java.text.Normalizer.normalize(expected, java.text.Normalizer.Form.NFD));
+    }
+
+    @Test
+    @DisplayName("буквы не совпали — ударение не переносится")
+    void refusesOtherLetters() {
+        assertThat(Serbian.withLatinAccents("вода", "vȍdu")).isEmpty();
+        assertThat(Serbian.withLatinAccents("вод", "vȍdu")).isEmpty();
+    }
 }

@@ -1,7 +1,11 @@
 package org.mpashka.vocabulary.core;
 
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Сербское письмо: перевод кириллицы в латиницу и показ ударений.
@@ -126,6 +130,71 @@ public final class Serbian {
      */
     public static String expandTilde(String text, String headword) {
         return text.indexOf('~') < 0 ? text : text.replace("~", stem(headword));
+    }
+
+    /**
+     * Переносит ударение с латинской записи (так его пишет викисловарь: {@code vȍdu}) на
+     * кириллическую форму ({@code воду} → {@code во̏ду}).
+     *
+     * <p>Латиница в кириллицу однозначно не переводится, поэтому буквы берутся из
+     * кириллицы, а из латиницы — только знаки. Пусто, если буквы не совпали или в латинице
+     * стоит знак, который ударением не является.
+     */
+    public static Optional<String> withLatinAccents(String cyrillic, String accentedLatin) {
+        Optional<List<LatinLetter>> parsed = latinLetters(accentedLatin);
+        if (parsed.isEmpty()) {
+            return Optional.empty();
+        }
+        List<LatinLetter> letters = parsed.get();
+        StringBuilder result = new StringBuilder(cyrillic.length() + 4);
+        int position = 0;
+        for (char ch : stripCombiningAccents(cyrillic).toCharArray()) {
+            result.append(ch);
+            for (char expected : CYRILLIC_TO_LATIN.getOrDefault(ch, String.valueOf(ch)).toCharArray()) {
+                if (position == letters.size()
+                        || Character.toLowerCase(letters.get(position).base) != Character.toLowerCase(expected)) {
+                    return Optional.empty();
+                }
+                result.append(letters.get(position++).marks);
+            }
+        }
+        return position == letters.size() ? Optional.of(result.toString()) : Optional.empty();
+    }
+
+    private record LatinLetter(char base, StringBuilder marks) {
+    }
+
+    private static Optional<List<LatinLetter>> latinLetters(String accentedLatin) {
+        List<LatinLetter> letters = new ArrayList<>();
+        for (char ch : decomposeLatinVowels(accentedLatin).toCharArray()) {
+            if (!isCombining(ch)) {
+                letters.add(new LatinLetter(ch, new StringBuilder()));
+            } else if (letters.isEmpty() || Accent.fromCombining(ch).isEmpty()) {
+                return Optional.empty();
+            } else {
+                letters.getLast().marks.append(ch);
+            }
+        }
+        return Optional.of(letters);
+    }
+
+    /**
+     * Латиница, где знаки ударения отделены от гласных и {@code r} комбинируемыми знаками, а
+     * согласные остались целыми буквами: у {@code ć} в NFD тот же знак, что у долгого
+     * восходящего, и полное разложение приписало бы согласной ударение.
+     */
+    public static String decomposeLatinVowels(String latin) {
+        StringBuilder result = new StringBuilder(latin.length() + 4);
+        for (char ch : Normalizer.normalize(latin, Normalizer.Form.NFC).toCharArray()) {
+            String decomposed = Normalizer.normalize(String.valueOf(ch), Normalizer.Form.NFD);
+            boolean vowel = decomposed.length() > 1 && "aeiourAEIOUR".indexOf(decomposed.charAt(0)) >= 0;
+            result.append(vowel ? decomposed : String.valueOf(ch));
+        }
+        return result.toString();
+    }
+
+    private static boolean isCombining(char ch) {
+        return ch >= '\u0300' && ch <= '\u036F';
     }
 
     private static String capitalize(String value) {
