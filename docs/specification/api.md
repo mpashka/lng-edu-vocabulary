@@ -131,6 +131,16 @@ GET /api/words/{name}
 ключ правила, а `ruleType` — его разновидность (тип склонения). По этой паре оболочка
 показывает **правило целиком**: окончания, парадигму слова, примеры и исключения.
 
+`source` — откуда буквы формы, `accentSource` — откуда её ударение: `SOURCE_DICTIONARY`
+(напечатано в словаре), `WIKTIONARY` (тогда `accentUrl` — статья, всегда есть: условие
+CC BY-SA), `RULES` (тон основы, выведен правилом — предположительно), `null` — ударения нет.
+
+```json
+{ "form": "во̏ду", "grammar": "acc.sg", "source": "RULES", "rule": "noun-declension",
+  "ruleType": "FEMININE_A", "accentSource": "WIKTIONARY",
+  "accentUrl": "https://en.wiktionary.org/wiki/voda#Serbo-Croatian" }
+```
+
 `roots` содержит связи с русским, сербским, праславянским, праиндоевропейским либо
 другим корнем; сейчас таблица корней ещё не заполнена.
 

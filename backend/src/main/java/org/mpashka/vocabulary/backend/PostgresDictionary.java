@@ -318,7 +318,8 @@ public class PostgresDictionary {
                 ? NounDeclension.typeOf(headword, Gender.valueOf(gender)).name()
                 : null;
         List<WordForm> stored = jdbc.query("""
-                select coalesce(form, form_plain) as form, grammar, source from word_form
+                select coalesce(form, form_plain) as form, grammar, source, accent_source, accent_url
+                from word_form
                 where word_id = ? and coalesce(grammar, '') not like '%.lat'
                 order by grammar, is_preferred desc, form_plain
                 """, (rs, i) -> {
@@ -326,7 +327,8 @@ public class PostgresDictionary {
             String source = rs.getString("source");
             boolean byRule = "RULES".equals(source) && "NOUN".equals(partOfSpeech);
             return new WordForm(rs.getString("form"), grammar, source,
-                    byRule ? "noun-declension" : null, byRule ? ruleType : null);
+                    byRule ? "noun-declension" : null, byRule ? ruleType : null,
+                    rs.getString("accent_source"), rs.getString("accent_url"));
         }, wordId);
         if (!"NOUN".equals(partOfSpeech) || gender == null) {
             return stored;
@@ -340,7 +342,7 @@ public class PostgresDictionary {
             String key = form.grammar() + "\u0000" + form.value();
             if (known.add(key)) {
                 result.add(new WordForm(form.value(), form.grammar(), "RULES", "noun-declension",
-                        NounDeclension.typeOf(headword, Gender.valueOf(gender)).name()));
+                        NounDeclension.typeOf(headword, Gender.valueOf(gender)).name(), null, null));
             }
         }
         return result;
@@ -422,8 +424,12 @@ public class PostgresDictionary {
      * @param rule     ключ правила, породившего форму; {@code null} — форма не от правила
      * @param ruleType разновидность правила (тип склонения) — по ней показывается
      *                 полная парадигма с примерами и исключениями
+     * @param accentSource откуда ударение: {@code SOURCE_DICTIONARY}, {@code WIKTIONARY},
+     *                 {@code RULES} — выведено, предположительно; {@code null} — ударения нет
+     * @param accentUrl статья-источник ударения; у {@code WIKTIONARY} есть всегда
      */
-    public record WordForm(String form, String grammar, String source, String rule, String ruleType) {
+    public record WordForm(String form, String grammar, String source, String rule, String ruleType,
+                           String accentSource, String accentUrl) {
     }
 
     // @tag:word-roots

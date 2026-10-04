@@ -208,6 +208,19 @@ const backToSearch = computed(() => {
             <li v-for="(form, index) in homonym.forms" :key="index">
               <span class="form-label">{{ formLabel(form.grammar) }}</span>
               <Accented :text="form.form" />
+              <a
+                v-if="form.accentSource === 'WIKTIONARY' && form.accentUrl"
+                class="accent-source"
+                :href="form.accentUrl"
+                target="_blank"
+                rel="noopener"
+                title="Ударение взято из викисловаря (CC BY-SA) — открыть статью"
+              >викисловарь</a>
+              <small
+                v-else-if="form.accentSource === 'RULES'"
+                class="accent-source"
+                title="В словаре ударение этой формы не напечатано: поставлен тон основы. Сверка с викисловарём — 98,6 %"
+              >предположительно</small>
               <small v-if="form.grammar" class="form-example">{{ caseExample[form.grammar.split('.')[0]] }}</small>
               <Accented v-if="serbianPhrase(form)" class="form-serbian-example" :text="serbianPhrase(form)" />
               <button

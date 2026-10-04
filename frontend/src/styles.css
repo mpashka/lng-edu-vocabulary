@@ -340,6 +340,8 @@ body:has(.theme-dark) { background: #1d1b18; color: #eee8dd; }
 .form-label, .root-kind { color: var(--ink-faint); font-size: 13px; min-width: 130px; }
 .form-source { border: 0; background: none; padding: 0; color: var(--accent); font-style: italic; cursor: pointer; }
 .form-example { color: var(--ink-soft); }
+.accent-source { color: var(--ink-soft); font-size: 0.8em; font-style: italic; }
+a.accent-source { color: var(--accent); }
 .form-serbian-example { color: var(--serbian); font-size: 14px; }
 .roots small { color: var(--ink-soft); }
 
