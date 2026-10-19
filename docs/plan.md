@@ -14,8 +14,8 @@ tags: "@tag:plan"
 ## Этап 0. Подготовка репозитория
 
 - [x] Установить llm-wiki-tags (дерево `index.md`, реестр `docs/tags.md`, раздел в `AGENTS.md`)
-- [x] Правила llm-wiki-tags в `.claude/rules/llm-wiki-tags/` (вики, раскладка, тэги, Java, JavaScript)
-- [x] Правила ux-principles в `.claude/rules/ux/` (core, desktop, process, positions);
+- [x] Правила llm-wiki-tags — канон по ссылке, своё — [CODE_REQUIREMENTS.md](CODE_REQUIREMENTS.md) (копии в `.claude/rules/` сняты, ad-282)
+- [x] Правила ux-principles — канон `ai/ux/rules` к поводу (копии сняты, ad-282);
       продуктовый слой — [specification/ui.md](specification/ui.md) со сценариями и счётом шагов
 - [x] Раскладка документации: `specification/` (взгляд снаружи), `implementation/` (взгляд внутрь),
       `testing/` (как проверяется), `requests/` (задачи); `index.md` у каждого модуля кода

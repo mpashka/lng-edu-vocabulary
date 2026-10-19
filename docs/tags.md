@@ -5,7 +5,7 @@ tags: "@tag:meta"
 # Реестр тэгов
 
 Родительский индекс: [index.md](index.md) ·
-Правила: `.claude/rules/llm-wiki-tags/tags.md`
+Правила: [llm-wiki-tags](https://github.com/mpashka/llm-wiki-tags)
 
 Тэг — короткий slug в kebab-case, записанный токеном `@tag:<slug>`. **Один и тот же тэг
 ставится и в коде, и в документации**, чтобы концепт, охватывающий несколько файлов и
@@ -54,16 +54,14 @@ Slug'и — строчные, в kebab-case (`[a-z0-9-]+`), при желани�
 
 - **Код**: комментарий в синтаксисе языка с токеном, прямо над элементом. Тэг может
   маркировать **пакет**, **файл**, **класс** (или его аналог) либо **метод/функцию**.
-  Java — `.claude/rules/llm-wiki-tags/code-tags-java.md`, JavaScript и Vue —
-  `code-tags-javascript.md` рядом.
+  Куда именно в Java, JavaScript и Vue — [CODE_REQUIREMENTS.md](CODE_REQUIREMENTS.md).
 - **Несколько тэгов**: через пробел — `@tag:accent @tag:word-forms`.
 
 ## Раскладка документации
 
 Страница относится ровно к одному из трёх деревьев: `specification/` (как словарь
 выглядит снаружи), `implementation/` (как устроен внутри), `testing/` (как проверяется).
-Рабочие файлы задач — `requests/<задача>/`. Правило целиком —
-`.claude/rules/llm-wiki-tags/docs-layout.md`.
+Рабочие файлы задач — `requests/<задача>/`.
 
 ## Поиск
 
