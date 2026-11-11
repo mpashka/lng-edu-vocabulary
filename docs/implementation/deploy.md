@@ -7,7 +7,7 @@ tags: "@tag:deploy"
 Родительский индекс: [index.md](index.md) · Локальная разработка — [development.md](development.md)
 
 Словарь опубликован как **`https://recnik.srpski.pasha-home.ru`** и открыт всем: ни пароля,
-ни клиентского сертификата. Живёт он на домашней платформе `app-server` (VPS в Yandex Cloud)
+ни клиентского сертификата. С 03.11.2026 живёт он на домашней платформе `app-oracle` (Oracle Cloud)
 пятым приложением рядом с CardDAV, «Моим кругом», Learning API и TimeLimit.
 
 **Хозяин серверной части — репозиторий `home-infra`**: роль `app-server/roles/app_vocabulary`,
@@ -58,8 +58,12 @@ compose-проект. Миграции Flyway применяются при ст
 ## Обновить содержимое словаря
 
 ```bash
-./scripts/upload-data.sh
+VOCABULARY_SERVER=ubuntu@92.5.226.36 ./scripts/upload-data.sh
 ```
+
+`VOCABULARY_SERVER` обязателен: прежнего значения `yc-user@app-server.pasha-home.ru`
+больше нет, поскольку DNS этого имени теперь ведёт на входной прокси. Перед запуском
+сверьте пользователя и адрес с `configs/inventory.yml`, группой `app_servers` в `home-infra`.
 
 Слепок локальной базы (`pg_dump --clean --if-exists`) уезжает на сервер и заливается в базу
 контейнера; на время заливки контейнер приложения останавливается — слепок сносит и создаёт

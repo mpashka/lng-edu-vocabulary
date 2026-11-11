@@ -3,7 +3,8 @@
 # Устройство выкладки — docs/implementation/deploy.md.
 set -euo pipefail
 
-server="${VOCABULARY_SERVER:-yc-user@app-server.pasha-home.ru}"
+# @tag:deploy
+server="${VOCABULARY_SERVER:?Задайте VOCABULARY_SERVER — SSH-пользователя и адрес app-oracle из реестра home-infra}"
 container="${VOCABULARY_DB_CONTAINER:-vocabulary-db-1}"
 app_container="${VOCABULARY_APP_CONTAINER:-vocabulary-app-1}"
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
