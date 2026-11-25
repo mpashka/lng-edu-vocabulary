@@ -91,6 +91,14 @@ class LessonFindingsParserTest {
     }
 
     @Test
+    void refusesOtherRootKindWithoutLanguage() {
+        assertThatThrownBy(() -> roots("врата	OTHER	kapı		WIKTIONARY	" + URL))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("строка 1")
+                .hasMessageContaining("язык связи вида OTHER");
+    }
+
+    @Test
     void refusesUnknownRootKind() {
         assertThatThrownBy(() -> roots("млин	TURKISH	kapı	из турецкого	WIKTIONARY	" + URL))
                 .isInstanceOf(IllegalStateException.class)

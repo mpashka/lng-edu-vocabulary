@@ -12,25 +12,14 @@ import java.util.Optional;
 // @tag:word-roots
 public enum RootKind {
 
-    PROTO_SLAVIC("праславянский"),
-    PROTO_INDO_EUROPEAN("праиндоевропейский"),
-    RUSSIAN("русский"),
-    SERBIAN("сербский"),
-    LATIN("латынь"),
-    ENGLISH("английский"),
-    ROMANCE("романский"),
-    OTHER("другой");
-
-    private final String title;
-
-    RootKind(String title) {
-        this.title = title;
-    }
-
-    /** Название по-русски. */
-    public String title() {
-        return title;
-    }
+    PROTO_SLAVIC,
+    PROTO_INDO_EUROPEAN,
+    RUSSIAN,
+    SERBIAN,
+    LATIN,
+    ENGLISH,
+    ROMANCE,
+    OTHER;
 
     public static Optional<RootKind> find(String name) {
         for (RootKind kind : values()) {

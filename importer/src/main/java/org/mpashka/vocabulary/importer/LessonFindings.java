@@ -50,7 +50,7 @@ public final class LessonFindings {
                     applyAccent(accent, w, accentReport);
                 }
                 for (Root root : roots) {
-                    rootReport.add(applyRoot(root, w), root.lemma() + "/" + root.value());
+                    applyRoot(root, w, rootReport);
                 }
             }
             pg.commit();
@@ -107,20 +107,23 @@ public final class LessonFindings {
         if (WiktionaryMatch.sameTone(form.form(), accented)) {
             return "совпало с нашим ударением";
         }
-        w.addDiscrepancy(form.wordId(), "accent." + form.grammar(), form.form(), accented,
-                form.accentSource(), accent.source(), accent.url());
+        String field = form.grammar() == null ? "accent" : "accent." + form.grammar();
+        w.addDiscrepancy(form.wordId(), field, form.form(), accented, form.accentSource(), accent.source(),
+                accent.url());
         return "расхождение — в discrepancy";
     }
 
-    private static String applyRoot(Root root, Writers w) throws SQLException {
+    // Связь пишется каждому омониму леммы: какой из них имеется в виду, файл не говорит.
+    private static void applyRoot(Root root, Writers w, Report report) throws SQLException {
+        String what = root.lemma() + "/" + root.value();
         List<Long> words = w.wordsByHeadword(root.lemma());
         if (words.isEmpty()) {
-            return "слова нет в базе";
+            report.add("слова нет в базе", what);
+            return;
         }
         for (long word : words) {
-            w.setRoot(word, root);
+            report.add(w.setRoot(word, root) ? "записано" : "связь уже есть с другой ссылкой — не тронута", what);
         }
-        return "записано";
     }
 
     private static InputStreamReader resource(String name) {
@@ -173,8 +176,8 @@ public final class LessonFindings {
                     insert into word_root (word_id, kind, value, note, source, source_url)
                     values (?, cast(? as root_kind), ?, ?, cast(? as data_source), ?)
                     on conflict (word_id, kind, value)
-                        do update set note = excluded.note, source = excluded.source,
-                                      source_url = excluded.source_url""");
+                        do update set note = excluded.note, source = excluded.source
+                        where word_root.source_url = excluded.source_url""");
         }
 
         List<Long> wordsByHeadword(String headword) throws SQLException {
@@ -225,14 +228,14 @@ public final class LessonFindings {
             discrepancy.executeUpdate();
         }
 
-        void setRoot(long wordId, Root value) throws SQLException {
+        boolean setRoot(long wordId, Root value) throws SQLException {
             root.setLong(1, wordId);
             root.setString(2, value.kind().name());
             root.setString(3, value.value());
             root.setString(4, value.note().isEmpty() ? null : value.note());
             root.setString(5, value.source());
             root.setString(6, value.url());
-            root.executeUpdate();
+            return root.executeUpdate() > 0;
         }
 
         @Override

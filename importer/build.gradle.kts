@@ -73,6 +73,8 @@ tasks.register<JavaExec>("wiktionaryAccents") {
     mainClass = "org.mpashka.vocabulary.importer.WiktionaryAccents"
     maxHeapSize = "2g"
     mustRunAfter("migrate", "wiktionaryPartsOfSpeech")
+    // Уборка прошлого прогона сбрасывает все ударения WIKTIONARY, и уроков тоже — урок пишется заново.
+    finalizedBy("lessonFindings")
 }
 
 // Часть речи из викисловаря словам, у которых правила её не определили — до записи ударений.
@@ -92,6 +94,8 @@ tasks.register<JavaExec>("hjpAccents") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.mpashka.vocabulary.importer.HjpAccents"
     mustRunAfter("migrate", "wiktionaryAccents")
+    // Уборка прошлого прогона сбрасывает все ударения HJP, и уроков тоже — урок пишется заново.
+    finalizedBy("lessonFindings")
 }
 
 // Находки уроков сербского: ударения словоформ и связи с языками — последними (задача lev-525).

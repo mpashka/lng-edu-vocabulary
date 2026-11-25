@@ -64,11 +64,12 @@ public final class LessonFindingsParser {
     public static List<Root> readRoots(String name, Reader source) throws IOException {
         List<Root> roots = new ArrayList<>();
         for (Row row : rows(name, source, 6)) {
+            RootKind kind = row.kind(2);
             roots.add(new Root(
                     row.required(1, "лемма кириллицей без ударений"),
-                    row.kind(2),
+                    kind,
                     row.required(3, "корень или родственное слово"),
-                    row.optional(4).orElse(""),
+                    kind == RootKind.OTHER ? row.required(4, "язык связи вида OTHER") : row.optional(4).orElse(""),
                     row.oneOf(5, "источник", ACCENT_SOURCES),
                     row.required(6, "ссылка на статью источника")));
         }
