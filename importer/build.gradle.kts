@@ -93,3 +93,12 @@ tasks.register<JavaExec>("hjpAccents") {
     mainClass = "org.mpashka.vocabulary.importer.HjpAccents"
     mustRunAfter("migrate", "wiktionaryAccents")
 }
+
+// Находки уроков сербского: ударения словоформ и связи с языками — последними (задача lev-525).
+tasks.register<JavaExec>("lessonFindings") {
+    group = "application"
+    description = "Записывает находки уроков из importer/src/main/resources/lesson-*.tsv"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.mpashka.vocabulary.importer.LessonFindings"
+    mustRunAfter("migrate", "wiktionaryAccents", "hjpAccents")
+}

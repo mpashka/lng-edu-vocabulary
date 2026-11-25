@@ -1,0 +1,23 @@
+# Ударения словоформ, выверенные уроками сербского (lng-edu-mcp). Записывает
+# ./gradlew :importer:lessonFindings. Формат и правила приёма —
+# docs/implementation/sources.md, «Находки уроков».
+#
+# Столбцы: лемма (кириллица без ударений), словоформа (кириллица без ударений),
+# помета формы (nom.sg, gen.pl, praes.1sg… — пусто, если урок её не знает),
+# форма латиницей со знаками ударения как в источнике, источник (WIKTIONARY или HJP),
+# ссылка на статью, примечание для человека (слово как в тексте урока, оговорки).
+#
+# Урок 3 «Bremenski muzikanti» (lng-edu-mcp, lem-489), выверка 2026-11-24.
+магарац	магарац	nom.sg	màgarac	WIKTIONARY	https://en.wiktionary.org/wiki/magarac#Serbo-Croatian	magarac (И. п.); форма в тексте совпадает с леммой
+магарац	магарца		màgārca	HJP	https://hjp.znanje.hr/index.php?show=search_by_id&id=e11gWxc%3D&keyword=magarac	imao magarca (В. п.); HJP даёт Р. п. -ārca, В. п. одушевлённого = Р. п.; источник описывает хорватскую норму
+млин	млин	nom.sg	mlȉn	WIKTIONARY	https://en.wiktionary.org/wiki/mlin#Serbo-Croatian	u mlin; В. п. = И. п., ударение из таблицы склонения Wiktionary
+петао	петао	nom.sg	pétao	WIKTIONARY	https://en.wiktionary.org/wiki/petao#Serbo-Croatian	petao (И. п., дважды); pétao — экавская форма, иекавская pijétao
+разбојник	разбојници	nom.pl	rázbōjnīci	WIKTIONARY	https://en.wiktionary.org/wiki/razbojnik#Serbo-Croatian	razbojnici; ударение из таблицы склонения Wiktionary
+разбојник	разбојник	nom.sg	rázbōjnīk	WIKTIONARY	https://en.wiktionary.org/wiki/razbojnik#Serbo-Croatian	razbojnik; форма в тексте совпадает с леммой
+преноћиште	преноћиште	nom.sg	prènoćīšte	HJP	https://hjp.znanje.hr/index.php?show=search_by_id&id=eVdnWRU%3D&keyword=preno%C4%87i%C5%A1te	loše prenoćište (И. п.); источник описывает хорватскую норму
+огњиште	огњиште	nom.sg	ògnjīšte	WIKTIONARY	https://en.wiktionary.org/wiki/ognji%C5%A1te#Serbo-Croatian	na ognjište; В. п. = И. п.
+вештица	вештица	nom.sg	vèštica	WIKTIONARY	https://en.wiktionary.org/wiki/ve%C5%A1tica#Serbo-Croatian	veštica (И. п.); vèštica — экавская форма, иекавская vjèštica
+судија	судија	nom.sg	sùdija	WIKTIONARY	https://en.wiktionary.org/wiki/sudija#Serbo-Croatian	sudija (И. п.); в HJP слова нет, хорватская норма — súdac
+чудовиште	чудовиште	nom.sg	čȕdovīšte	HJP	https://hjp.znanje.hr/index.php?show=search_by_id&id=f1pjWRQ%3D&keyword=%C4%8Dudovi%C5%A1te	crno čudovište (И. п.); источники расходятся — Wiktionary даёт čudòvīšte, взято по HJP, место ударения совпадает с Govori
+ђубриште	ђубриште	nom.sg	đȕbrīšte	HJP	https://hjp.znanje.hr/index.php?show=search_by_id&id=fF5vXxA%3D&keyword=%C4%91ubri%C5%A1te	na đubrište; В. п. = И. п.; источник описывает хорватскую норму
+господар	господар	nom.sg	gospòdār	WIKTIONARY	https://en.wiktionary.org/wiki/gospodar#Serbo-Croatian	gospodar; из раздела «Проверено, но в 16 не вошло»; форма в тексте совпадает с леммой, ударение дают W и HJP, Р. п. gospodára

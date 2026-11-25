@@ -1,5 +1,5 @@
 ---
-tags: "@tag:import @tag:source-db @tag:wiktionary @tag:hjp"
+tags: "@tag:import @tag:source-db @tag:wiktionary @tag:hjp @tag:lesson-findings"
 ---
 
 # Перенос данных и отчёты
@@ -41,6 +41,16 @@ tags: "@tag:import @tag:source-db @tag:wiktionary @tag:hjp"
   `src/main/resources/hjp-accents.tsv`, `./gradlew :importer:hjpAccents`
   ([sources.md](../docs/implementation/sources.md), «hjp.znanje.hr»)
 - `TargetDatabase.java` — подключение к Postgres из `secrets.properties`, общее у переноса и отчётов
+
+## Находки уроков
+
+Формат файлов и правила приёма — [sources.md](../docs/implementation/sources.md),
+«Находки уроков».
+
+- `LessonFindingsParser.java` — разбор и проверка `src/main/resources/lesson-accents.tsv` и
+  `lesson-roots.tsv`; тесты — `src/test/java/.../LessonFindingsParserTest.java`
+- `LessonFindings.java` — запись ударений словоформ и связей с языками,
+  `./gradlew :importer:lessonFindings`
 
 ## Отчёты о качестве правил
 
